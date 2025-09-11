@@ -21,3 +21,8 @@
 2025-09-11 22:15:20 CANDLE BTCUSDT was written TO btcusdt.csv. So life is good
 2025-09-11 22:15:20 Candle of 'TONUSDT' has written to tonusdt.csv. Now I'm waiting for the next 5 minutes
 2025-09-11 20:29:33 UTC Waiting 41.5 till the next 5 minutes before requesting price from the exchange
+2025-09-11T20:40:16.033Z Waiting 299.0s to the next 5-minute boundary (UTC).
+2025-09-11T20:45:15.655Z !_! Failed to retrieve data for TONUSDT: HTTP 451
+2025-09-11T20:45:15.657Z Candle for TONUSDT written to tonusdt.csv. Waiting 5 minutes.
+2025-09-11T20:45:16.141Z !_! Failed to retrieve data for BTCUSDT: HTTP 451
+2025-09-11T20:45:16.143Z Candle for BTCUSDT written to btcusdt.csv. Waiting 5 minutes.
