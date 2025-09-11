@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 def write_log_line(text, file_path=f'data/logs.csv'):
     try: 
         logging.info(f'{text}')
-        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         with open(file_path, 'a', encoding='utf-8') as f:
             f.write(f'{timestamp} UTC {text}\n')
             print(text)                                 # to also show in console 
@@ -53,7 +53,7 @@ def make_a_record_from_binance(symbol, csvname, limit=2):
         close_time = last_candle[6]
     
         last_candel.append({'close_time': convert_timestamp_to_iso(close_time), 
-                            'record_time': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f'),
+                            'record_time': datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f'),
                             'close': close_price,
                             'open': open_price,
                             'high': high_price,
@@ -75,7 +75,7 @@ def make_a_record_from_binance(symbol, csvname, limit=2):
 
 
 def main():
-    now = datetime.utcnow()
+    now = datetime.now(datetime.timezone.utc)
     minutes_to_next_5 = (5 - (now.minute % 5)) % 5 # How much time before the next 5 minutes interval (XX:00, XX:05, XX:10, etc) in UTC
 
     # We need to start 15 seconds after 5-minute round interval, because the exchange does not close candles exact after 5 minutes closed
