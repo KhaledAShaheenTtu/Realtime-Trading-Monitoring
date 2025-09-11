@@ -8,9 +8,9 @@ from datetime import datetime, timedelta
 def write_log_line(text, file_path=f'data/logs.csv'):
     try: 
         logging.info(f'{text}')
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         with open(file_path, 'a', encoding='utf-8') as f:
-            f.write(f'{timestamp} {text}\n')
+            f.write(f'{timestamp} UTC {text}\n')
             print(text)                                 # to also show in console 
     except Exception as e:
         logging.error(f"Error writing to log file: {e}")
@@ -19,8 +19,8 @@ def write_log_line(text, file_path=f'data/logs.csv'):
 
 
 def convert_timestamp_to_iso(timestamp):
-    dt = datetime.fromtimestamp(timestamp / 1000.0)    # Convert to datetime timestamp 
-    return dt.strftime('%Y-%m-%d %H:%M:%S.%f')         # Convert to ISO timestamt 
+    dt = datetime.fromtimestamp(timestamp / 1000.0, tz=datetime.timezone.utc)    # Convert to UTC datetime timestamp (timezone-aware)
+    return dt.strftime('%Y-%m-%d %H:%M:%S.%f')           # Convert to ISO timestamp in UTC
 
 
 def make_a_record_from_binance(symbol, csvname, limit=2):
@@ -53,7 +53,7 @@ def make_a_record_from_binance(symbol, csvname, limit=2):
         close_time = last_candle[6]
     
         last_candel.append({'close_time': convert_timestamp_to_iso(close_time), 
-                            'record_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
+                            'record_time': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f'),
                             'close': close_price,
                             'open': open_price,
                             'high': high_price,
@@ -75,8 +75,8 @@ def make_a_record_from_binance(symbol, csvname, limit=2):
 
 
 def main():
-    now = datetime.now()
-    minutes_to_next_5 = (5 - (now.minute % 5)) % 5 # How much time before the next 5 minutes interval (XX:00, XX:05, XX:10, etc)
+    now = datetime.utcnow()
+    minutes_to_next_5 = (5 - (now.minute % 5)) % 5 # How much time before the next 5 minutes interval (XX:00, XX:05, XX:10, etc) in UTC
 
     # We need to start 15 seconds after 5-minute round interval, because the exchange does not close candles exact after 5 minutes closed
     # It usually takes several seconds. XX:05:15 (+15 seconds) should be enough
