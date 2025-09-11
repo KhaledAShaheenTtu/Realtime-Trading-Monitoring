@@ -102,6 +102,6 @@ def main():
         
         time.sleep(300)                     # wait 5 minutes to write next price 
 
-
+#test addition
 if __name__ == '__main__':
     main()
