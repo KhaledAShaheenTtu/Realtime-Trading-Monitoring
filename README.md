@@ -44,12 +44,19 @@ To be done
 
 ## Dependencies
 
-Python standard-library modules (as of 2025-09-10):
+Python modules (lastest versions as of 2025-09-10):
 
 ```python 
-requests
-pandasw
 logging
 time
 datetime
+json
+random
+re
+string
+
+# Could be out of stardard Conda package, but could be installed from Conda
+requests
+pandas
+websocket
 ```
