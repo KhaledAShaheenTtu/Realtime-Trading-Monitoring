@@ -3,7 +3,10 @@ import pandas as pd
 import logging
 import time
 import datetime
+import os
+import csv
 from trading_data_classes import GetDataTradingView, DataWorks
+from dotenv import load_dotenv
 
 tv = GetDataTradingView()
 dw = DataWorks()
@@ -22,7 +25,12 @@ def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
     try: 
         # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        write_header = False
+        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+            write_header = True
         with open(file_path, 'a', encoding='utf-8') as f:
+            if write_header:
+                f.write("instrument,timestamp_utc,open_price,high_price,low_price,close_price,record_timestamp_utc\n")
             """
             writing the row with the following data: 
                 (0) exchange:instument (symbol)
@@ -33,10 +41,10 @@ def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
                 (5) close_price
                 (6) record_timestamp (when the record has been put into the file)
             """
-            f.write(f'{df.iloc[0:1].values[0][0]},'\
+            f.write(f'{df.iloc[0:1].values[0][0]},'
                     f'{pd.to_datetime(df.iloc[0:1].index.values[0])},'
-                    f'{df.iloc[0:1].values[0][1]},{df.iloc[0:1].values[0][2]},'\
-                    f'{df.iloc[0:1].values[0][3]},{df.iloc[0:1].values[0][4]},'\
+                    f'{df.iloc[0:1].values[0][1]},{df.iloc[0:1].values[0][2]},'
+                    f'{df.iloc[0:1].values[0][3]},{df.iloc[0:1].values[0][4]},'
                     f'{timestamp}\n'
                     )
     except Exception as e:
@@ -45,7 +53,57 @@ def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
     return
 
 
-def main():
+def get_latest_timestamp(csv_files):
+    latest = None
+    for file in csv_files:
+        try:
+            df = pd.read_csv(file)
+            ts = df['timestamp_utc'].dropna().max()
+            if ts:
+                dt = datetime.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+                if not latest or dt > latest:
+                    latest = dt
+        except Exception as e:
+            print(f"Error reading {file}: {e}")
+    return int(latest.timestamp()) if latest else -1
+
+
+def fetch_and_write_news(to_ts, news_limit, output_csv="data/news.csv"):
+    load_dotenv()
+    API_KEY = os.getenv("COINDESK_API_KEY")
+    response = requests.get(
+        "https://data-api.coindesk.com/news/v1/article/list",
+        params={
+            "lang": "EN",
+            "limit": news_limit,
+            "source_ids": "coindesk",
+            "categories": "BTC,TON",
+            "to_ts": to_ts,
+            "api_key": API_KEY,
+        },
+        headers={"Content-type": "application/json; charset=UTF-8"}
+    )
+    json_response = response.json()
+    with open(output_csv, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+        writer.writerow(["instrument", "utc_timestamp", "source", "raw_text"])
+        for article in json_response.get("Data", []):
+            categories = [c["CATEGORY"] for c in article.get("CATEGORY_DATA", [])]
+            instrument = None
+            if "BTC" in categories:
+                instrument = "BTC"
+            elif "TON" in categories:
+                instrument = "TON"
+            if instrument:
+                utc_timestamp = datetime.datetime.utcfromtimestamp(article["PUBLISHED_ON"]).strftime("%Y-%m-%d %H:%M:%S")
+                source = article.get("SOURCE_DATA", {}).get("NAME", "Unknown")
+                raw_text = article.get("BODY", "")
+                writer.writerow([instrument, utc_timestamp, source, raw_text])
+
+
+def main(iterations=10):
+    iterations = 2
+    news_limit = 2
     now = datetime.datetime.now()
     minutes_to_next_5 = (5 - (now.minute % 5)) % 5 
     # How much time left before the next 5 minutes interval (XX:00, XX:05, XX:10, etc)
@@ -62,27 +120,29 @@ def main():
 
     # Delay to the next start time
     delay_seconds = (scheduled_time - now).total_seconds()
-    dw.write_log_line(text = f'Waiting {round(delay_seconds, 1)} seconds till the next'\
+    dw.write_log_line(text = f'Waiting {round(delay_seconds, 1)} seconds till the next'
                              f' 5 minutes interval before requesting price from the TradingView')
     
     time.sleep(delay_seconds)
 
-    # When time (XX:05:15) has come --> run interatively every 5 minutes
-    while True:
+    # Run for a configurable number of iterations
+    for i in range(iterations):
         make_a_record_from_tv(symbol = "BTCUSDT", exchange = "BINANCE", interval = "5", 
                               n_bars = 1,
                               file_path = 'data/btcusdt.csv')     
-        dw.write_log_line(text = f"Candle of 'BTCUSDT' has written to btcusdt.csv."\
+        dw.write_log_line(text = f"Candle of 'BTCUSDT' has written to btcusdt.csv."
                                  f" Now I'm waiting for the next 5 minutes")
 
         make_a_record_from_tv(symbol = "TONUSDT", exchange = "BINANCE", interval = "5", 
                               n_bars = 1,
                               file_path = 'data/tonusdt.csv')     
-        dw.write_log_line(text = f"Candle of 'TONUSDT' has written to tonusdt.csv."\
-                                 f" Now I'm waiting for the next 5 minutes")
+        time.sleep(300) # wait 5 minutes to write next price 
 
-        time.sleep(300) 
-        # wait 5 minutes to write next price 
+    # Fetch news after all price data updates
+    csv_files = ["data/btcusdt.csv", "data/tonusdt.csv"]
+    to_ts = get_latest_timestamp(csv_files)
+    fetch_and_write_news(to_ts, news_limit)
+    dw.write_log_line(text = f"News updated for timestamp {to_ts}.")
 
 if __name__ == '__main__':
-    main()
+    main(iterations=10) # Change 10 to your desired number of iterations
