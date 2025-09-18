@@ -21,6 +21,7 @@ def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
         n_bars = n_bars,        #  How many bars (candles) we're requesting: 
                                 #               1 --> only the last one, up to 10_000 --> for history
     )
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
 
     try: 
         # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -47,62 +48,54 @@ def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
                     f'{df.iloc[0:1].values[0][3]},{df.iloc[0:1].values[0][4]},'
                     f'{timestamp}\n'
                     )
+            return pd.to_datetime(df.iloc[0:1].index.values[0])
     except Exception as e:
         logging.error(f"Error writing to log file: {e}")
         print(f"Error writing to log file: {e}")
     return
 
 
-def get_latest_timestamp(csv_files):
-    latest = None
-    for file in csv_files:
-        try:
-            df = pd.read_csv(file)
-            ts = df['timestamp_utc'].dropna().max()
-            if ts:
-                dt = datetime.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
-                if not latest or dt > latest:
-                    latest = dt
-        except Exception as e:
-            print(f"Error reading {file}: {e}")
-    return int(latest.timestamp()) if latest else -1
+def fetch_and_write_news(to_ts, news_limit, file_path):
+    try:
+        print(to_ts)
+        output_csv = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
+        load_dotenv()
+        
+        API_KEY = os.getenv("COINDESK_API_KEY")
+        response = requests.get(
+            "https://data-api.coindesk.com/news/v1/article/list",
+            params={
+                "lang": "EN",
+                "limit": news_limit,
+                "source_ids": "coindesk",
+                "categories": "BTC,TON",
+                "to_ts": to_ts,
+                "api_key": API_KEY,
+            },
+            headers={"Content-type": "application/json; charset=UTF-8"}
+        )
+        json_response = response.json()
+        with open(output_csv, mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerow(["instrument", "utc_timestamp", "source", "raw_text"])
+            for article in json_response.get("Data", []):
+                categories = [c["CATEGORY"] for c in article.get("CATEGORY_DATA", [])]
+                instrument = None
+                if "BTC" in categories:
+                    instrument = "BTC"
+                elif "TON" in categories:
+                    instrument = "TON"
+                if instrument:
+                    utc_timestamp = datetime.datetime.fromtimestamp(article["PUBLISHED_ON"], tz=datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+                    source = article.get("SOURCE_DATA", {}).get("NAME", "Unknown")
+                    raw_text = article.get("BODY", "")
+                    writer.writerow([instrument, utc_timestamp, source, raw_text])
 
+    except Exception as e:
+        logging.error(f"Error writing getting news: {e}")
+        print(f"Error writing getting news: {e}")
 
-def fetch_and_write_news(to_ts, news_limit, output_csv="data/news.csv"):
-    load_dotenv()
-    API_KEY = os.getenv("COINDESK_API_KEY")
-    response = requests.get(
-        "https://data-api.coindesk.com/news/v1/article/list",
-        params={
-            "lang": "EN",
-            "limit": news_limit,
-            "source_ids": "coindesk",
-            "categories": "BTC,TON",
-            "to_ts": to_ts,
-            "api_key": API_KEY,
-        },
-        headers={"Content-type": "application/json; charset=UTF-8"}
-    )
-    json_response = response.json()
-    with open(output_csv, mode="w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-        writer.writerow(["instrument", "utc_timestamp", "source", "raw_text"])
-        for article in json_response.get("Data", []):
-            categories = [c["CATEGORY"] for c in article.get("CATEGORY_DATA", [])]
-            instrument = None
-            if "BTC" in categories:
-                instrument = "BTC"
-            elif "TON" in categories:
-                instrument = "TON"
-            if instrument:
-                utc_timestamp = datetime.datetime.utcfromtimestamp(article["PUBLISHED_ON"]).strftime("%Y-%m-%d %H:%M:%S")
-                source = article.get("SOURCE_DATA", {}).get("NAME", "Unknown")
-                raw_text = article.get("BODY", "")
-                writer.writerow([instrument, utc_timestamp, source, raw_text])
-
-
-def main(iterations=10):
-    iterations = 2
+def main():
     news_limit = 2
     now = datetime.datetime.now()
     minutes_to_next_5 = (5 - (now.minute % 5)) % 5 
@@ -125,24 +118,22 @@ def main(iterations=10):
     
     time.sleep(delay_seconds)
 
-    # Run for a configurable number of iterations
-    for i in range(iterations):
+    while True:
         make_a_record_from_tv(symbol = "BTCUSDT", exchange = "BINANCE", interval = "5", 
                               n_bars = 1,
                               file_path = 'data/btcusdt.csv')     
         dw.write_log_line(text = f"Candle of 'BTCUSDT' has written to btcusdt.csv."
                                  f" Now I'm waiting for the next 5 minutes")
 
-        make_a_record_from_tv(symbol = "TONUSDT", exchange = "BINANCE", interval = "5", 
+        returned_timestamp = make_a_record_from_tv(symbol = "TONUSDT", exchange = "BINANCE", interval = "5", 
                               n_bars = 1,
                               file_path = 'data/tonusdt.csv')     
+        
+        dw.write_log_line(text = f"Candle of 'TONUSDT' has written to tonusdt.csv."
+                                 f" Now I'm waiting for the next 5 minutes")
+        fetch_and_write_news(int(returned_timestamp.timestamp()), news_limit, file_path = 'data/news.csv')
+        dw.write_log_line(text = f"News for BTCUSDT and TONUSDT retrieved from timestamp: {returned_timestamp} Now I'm waiting for the next 5 minutes")
         time.sleep(300) # wait 5 minutes to write next price 
 
-    # Fetch news after all price data updates
-    csv_files = ["data/btcusdt.csv", "data/tonusdt.csv"]
-    to_ts = get_latest_timestamp(csv_files)
-    fetch_and_write_news(to_ts, news_limit)
-    dw.write_log_line(text = f"News updated for timestamp {to_ts}.")
-
 if __name__ == '__main__':
-    main(iterations=10) # Change 10 to your desired number of iterations
+    main() 

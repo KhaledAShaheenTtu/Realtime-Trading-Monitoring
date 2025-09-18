@@ -4,7 +4,7 @@ import logging
 import random
 import re
 import string
-
+import os
 # Could be out of stardard Conda package
 import requests                             # conda install requests
 import pandas as pd                         # conda install pandas
@@ -315,7 +315,8 @@ class GetDataTradingView:
 
 
 class DataWorks: 
-    def write_log_line(self, text, file_path=f'data/logs.csv'):
+
+    def write_log_line(self, text, file_path="data/logs.csv"):
         """
         Basic function for appending log rows to .csv file.
         Expecting 2 args: 
@@ -323,6 +324,7 @@ class DataWorks:
             (2) path to csv file for appending the log line 
         """
         try: 
+            file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
             logging.info(f'{text}')
             timestamp = datetime.datetime.now(tz = datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
             with open(file_path, 'a', encoding='utf-8') as f:
