@@ -5,21 +5,24 @@ import time
 import datetime
 import os
 import csv
-from trading_data_classes import GetDataTradingView, DataWorks
-from dotenv import load_dotenv
+import asyncio
 
+# Our own classes to gather some data 
+from trading_data_classes import GetDataTradingView, DataWorks
+
+# Creating objects of our classes 
 tv = GetDataTradingView()
 dw = DataWorks()
 
 
-def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
+async def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
     df = tv.get_hist(           
         symbol = symbol,        #  Instrument name, format like "BTCUSDT"
         exchange = exchange,    #  Exchange, source of the quotes (from which TradingView get quotes)
                                 #               format "BINANCE"
         interval = interval,    #  str value like "5" --> means 5 minutes
         n_bars = n_bars,        #  How many bars (candles) we're requesting: 
-                                #               1 --> only the last one, up to 10_000 --> for history
+                                #               1 --> only the last one, up to 10_000 --> for history (paywall after ~10k)
     )
     file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
 
@@ -48,20 +51,31 @@ def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
                     f'{df.iloc[0:1].values[0][3]},{df.iloc[0:1].values[0][4]},'
                     f'{timestamp}\n'
                     )
+            
+            dw.write_log_line(text = f"Candle of '{df.iloc[0:1].values[0][0]}' has written to {file_path}"
+                                     f"with the time {pd.to_datetime(df.iloc[0:1].index.values[0])}")
             return pd.to_datetime(df.iloc[0:1].index.values[0])
+        
     except Exception as e:
         logging.error(f"Error writing to log file: {e}")
         print(f"Error writing to log file: {e}")
+
     return
 
 
-def fetch_and_write_news(to_ts, news_limit, file_path):
+async def fetch_and_write_news(news_limit, file_path):
+    """
+    Endpoint desription: 
+    https://developers.coindesk.com/documentation/data-api/news_v1_article_list
+    
+    Provides the articles starting from the latest available in amount limited by 'news_limit' parameter 
+    """
     try:
-        print(to_ts)
+        print(f"Fetching the latest news...")
         output_csv = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
-        load_dotenv()
-        
-        API_KEY = os.getenv("COINDESK_API_KEY")
+
+        # API_KEY = ""
+
         response = requests.get(
             "https://data-api.coindesk.com/news/v1/article/list",
             params={
@@ -69,8 +83,8 @@ def fetch_and_write_news(to_ts, news_limit, file_path):
                 "limit": news_limit,
                 "source_ids": "coindesk",
                 "categories": "BTC,TON",
-                "to_ts": to_ts,
-                "api_key": API_KEY,
+                # "to_ts": to_ts,           # there is no need to send to_ts to get the latest articles 
+                # "api_key": API_KEY,       # for some quota we do not need to provide API key, that should be enough for tests
             },
             headers={"Content-type": "application/json; charset=UTF-8"}
         )
@@ -86,24 +100,29 @@ def fetch_and_write_news(to_ts, news_limit, file_path):
                 elif "TON" in categories:
                     instrument = "TON"
                 if instrument:
-                    utc_timestamp = datetime.datetime.fromtimestamp(article["PUBLISHED_ON"], tz=datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+                    utc_timestamp = datetime.datetime.fromtimestamp(article["PUBLISHED_ON"], 
+                                                                    tz=datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
                     source = article.get("SOURCE_DATA", {}).get("NAME", "Unknown")
                     raw_text = article.get("BODY", "")
                     writer.writerow([instrument, utc_timestamp, source, raw_text])
+        dw.write_log_line(text = f"News for BTCUSDT and TONUSDT retrieved")
 
     except Exception as e:
         logging.error(f"Error writing getting news: {e}")
         print(f"Error writing getting news: {e}")
+        dw.write_log_line(text = f"Getting Exception trying to fetch some news: \n{e}")
+    return 
 
-def main():
-    news_limit = 2
-    now = datetime.datetime.now()
+
+async def main():
+    # This 'now' is only for internal loop to iteratively write prices, so this is the only place we do not convert it to GMT
+    now = datetime.datetime.now()                   
+    
+    # Calculating how much time left before the next 5 minutes interval (XX:00, XX:05, XX:10, etc)
     minutes_to_next_5 = (5 - (now.minute % 5)) % 5 
-    # How much time left before the next 5 minutes interval (XX:00, XX:05, XX:10, etc)
 
-    # We need to start 15 seconds after 5-minute round interval, 
-    #           because the exchange does not close candles exact after 5 minutes closed
-    # It usually takes several seconds. XX:05:15 (+15 seconds) should be enough
+    # We need to start 15 seconds after 5-minute round interval, because the exchange does not close candles immediately
+    # It takes some seconds. So XX:05:15 (+15 seconds) should be enough
     next_5_minute_mark = now + datetime.timedelta(minutes=minutes_to_next_5)
     scheduled_time = next_5_minute_mark.replace(second=15, microsecond=0)
 
@@ -115,25 +134,32 @@ def main():
     delay_seconds = (scheduled_time - now).total_seconds()
     dw.write_log_line(text = f'Waiting {round(delay_seconds, 1)} seconds till the next'
                              f' 5 minutes interval before requesting price from the TradingView')
-    
-    time.sleep(delay_seconds)
+    await asyncio.sleep(delay_seconds)  # instead of time.sleep() we now have to use asyncio version
 
     while True:
-        make_a_record_from_tv(symbol = "BTCUSDT", exchange = "BINANCE", interval = "5", 
-                              n_bars = 1,
-                              file_path = 'data/btcusdt.csv')     
-        dw.write_log_line(text = f"Candle of 'BTCUSDT' has written to btcusdt.csv."
-                                 f" Now I'm waiting for the next 5 minutes")
+        # Executing the tasks (coroutines in terms of asyncio) in parallel using asyncio.gather(task1, task2... taskN)
+        await asyncio.gather(make_a_record_from_tv(symbol = "BTCUSDT",                                  # Coroutine 1: Write price of BTCUSDT 
+                                                   exchange = "BINANCE", interval = "5", n_bars = 1, 
+                                                   file_path = 'data/btcusdt.csv'), 
+                             make_a_record_from_tv(symbol = "TONUSDT",                                  # Coroutine 2: Write price of TONUSDT
+                                                   exchange = "BINANCE", interval = "5", n_bars = 1, 
+                                                   file_path = 'data/tonusdt.csv'),
+                             make_a_record_from_tv(symbol = "MAG7",                                     # Coroutine 3: Write price of MAG7
+                                                   exchange = "LSE", interval = "5", n_bars = 1, 
+                                                   file_path = 'data/mag7.csv'),
+                             fetch_and_write_news(news_limit=1, file_path = 'data/news.csv')            # Coroutine 4: Fetching news 
+                            )
 
-        returned_timestamp = make_a_record_from_tv(symbol = "TONUSDT", exchange = "BINANCE", interval = "5", 
-                              n_bars = 1,
-                              file_path = 'data/tonusdt.csv')     
+        # We can also execute any function AFTER asyncio.gather() finished like that: 
+        # await fetch_and_write_news(news_limit, file_path = 'data/news.csv')
         
-        dw.write_log_line(text = f"Candle of 'TONUSDT' has written to tonusdt.csv."
-                                 f" Now I'm waiting for the next 5 minutes")
-        fetch_and_write_news(int(returned_timestamp.timestamp()), news_limit, file_path = 'data/news.csv')
-        dw.write_log_line(text = f"News for BTCUSDT and TONUSDT retrieved from timestamp: {returned_timestamp} Now I'm waiting for the next 5 minutes")
-        time.sleep(300) # wait 5 minutes to write next price 
+        dw.write_log_line(text = f"Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...")
+        
+        await asyncio.sleep(300)                                                             # wait 5 minutes to write the next price
+        # TODO: with such an approach there will be small data drift here cause our tasks takes several seconds, 
+        #   so in total it's not exact 300, its about 303-307 seconds for every 5 minutes
+        #   that would be great to make a single Loop to count the time above asyncio.gather() execution
+
 
 if __name__ == '__main__':
-    main() 
+    asyncio.run(main())

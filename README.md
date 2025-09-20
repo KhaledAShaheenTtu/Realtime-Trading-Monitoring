@@ -20,17 +20,18 @@ What does it do?
 * Waits for the next 5-minute boundary (XX:00, XX:05, XX:10, etc.).
 * Then waits an additional 15 seconds to allow the exchange to finalize the 5-minute close.
 * Requests the price from the exchange, receives it, and stores it in a local CSV file.
+* In parallel it requests the latest news articles about 2 instruments and store it locally in data/news.csv
 
 How to merge:
 
 Currently, it logs two instruments: TONUSDT and BTCUSDT. Since they share the same timestamps, you can merge them on the timestamp field—either later during analysis or directly at write time.
 
 
-### TODO for Part 1: 
+### TODO: 
 
-1) For now the timestamps of the price is from the exchange (so they are alligned to each other), but they're writing in local timezone of the machine requesting price. It's better to convert timestamps to GMT cause we're in different timezones and that could be asking for trouble to store them in local time. 
+1) With current approach there will be small data drift cause our tasks takes several seconds, so in total it's not exact 300, its about 303-307 seconds for every 5 minutes. That would be great to make a single Loop to count the time above asyncio.gather() execution
 
-2) For now in case of skip for any reason we're going to have ommited data. That would be great to add functionality to fullfill the gaps by request of operator and in the background (in case of network issues and skip of 1 record row). 
+2) To replace 'create_connection from websocket' with local functions to fit project guidelines
 
 ## Part 2. News 
 
@@ -54,9 +55,9 @@ json
 random
 re
 string
+pandas
 
 # Could be out of stardard Conda package, but could be installed from Conda
 requests
-pandas
 websocket
 ```
