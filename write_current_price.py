@@ -25,9 +25,7 @@ async def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
                                 #               1 --> only the last one, up to 10_000 --> for history (paywall after ~10k)
     )
     file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
-
     try: 
-        # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         write_header = False
         if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
@@ -35,31 +33,31 @@ async def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
         with open(file_path, 'a', encoding='utf-8') as f:
             if write_header:
                 f.write("instrument,timestamp_utc,open_price,high_price,low_price,close_price,record_timestamp_utc\n")
-            """
-            writing the row with the following data: 
+
+            # Writing all rows from the DataFrame (1 in case of 5-minutes loop execution) 
+            for idx, row in df.iterrows(): 
+                """ 
+                Writing the row with the following data: 
+                
                 (0) exchange:instument (symbol)
                 (1) candle datettime (pandas to_datetime) with the format 2025-09-13 17:30:00115905.88
                 (2) open_price
                 (3) high_price
                 (4) low_price
                 (5) close_price
-                (6) record_timestamp (when the record has been put into the file)
-            """
-            f.write(f'{df.iloc[0:1].values[0][0]},'
-                    f'{pd.to_datetime(df.iloc[0:1].index.values[0])},'
-                    f'{df.iloc[0:1].values[0][1]},{df.iloc[0:1].values[0][2]},'
-                    f'{df.iloc[0:1].values[0][3]},{df.iloc[0:1].values[0][4]},'
-                    f'{timestamp}\n'
-                    )
-            
-            dw.write_log_line(text = f"Candle of '{df.iloc[0:1].values[0][0]}' has written to {file_path}"
-                                     f"with the time {pd.to_datetime(df.iloc[0:1].index.values[0])}")
-            return pd.to_datetime(df.iloc[0:1].index.values[0])
-        
+                (6) record_timestamp (when the record has been put into the file) 
+                
+                """
+                f.write(f'{row.iloc[0]},'
+                        f'{pd.to_datetime(idx)},'
+                        f'{row.iloc[1]},{row.iloc[2]},{row.iloc[3]},{row.iloc[4]},'
+                        f'{timestamp}\n')
+        dw.write_log_line(text = f"Candle of '{row.iloc[0]}' has written to {file_path}"
+                                 f" with the time {pd.to_datetime(idx)}")
+
     except Exception as e:
         logging.error(f"Error writing to log file: {e}")
         print(f"Error writing to log file: {e}")
-
     return
 
 
