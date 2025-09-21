@@ -6,9 +6,12 @@ import datetime
 import os
 import csv
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 # Our own classes to gather some data 
 from trading_data_classes import GetDataTradingView, DataWorks
+# EDGAR client for SEC filings metadata
+import edgar_client
 
 # Creating objects of our classes 
 tv = GetDataTradingView()
@@ -112,6 +115,28 @@ async def fetch_and_write_news(news_limit, file_path):
     return 
 
 
+async def fetch_and_write_filings(executor=None):
+    """Fetch SEC filings metadata for BTC, TON and MAG7 and write CSV files.
+
+    Uses edgar_client.get_and_write_filings_for_keyword to perform searches and writes files
+    into the `data/` folder as `sec_filings_{instrument}.csv`.
+    """
+    loop = asyncio.get_running_loop()
+    # Run blocking network calls in a threadpool to avoid blocking event loop
+    if executor is None:
+        executor = ThreadPoolExecutor(max_workers=3)
+
+    tasks = []
+    # One combined CSV with instrument column and UTC filedDate
+    tasks.append(loop.run_in_executor(executor, edgar_client.get_and_write_combined_btc_ton_mag7, 'data', 50, 50, 20))
+
+    results = await asyncio.gather(*tasks)
+    for r in results:
+        if r:
+            dw.write_log_line(text = f"EDGAR filings written to {r}")
+    return
+
+
 async def main():
     # This 'now' is only for internal loop to iteratively write prices, so this is the only place we do not convert it to GMT
     now = datetime.datetime.now()                   
@@ -145,7 +170,8 @@ async def main():
                              make_a_record_from_tv(symbol = "MAG7",                                     # Coroutine 3: Write price of MAG7
                                                    exchange = "LSE", interval = "5", n_bars = 1, 
                                                    file_path = 'data/mag7.csv'),
-                             fetch_and_write_news(news_limit=1, file_path = 'data/news.csv')            # Coroutine 4: Fetching news 
+                             fetch_and_write_news(news_limit=1, file_path = 'data/news.csv'),           # Coroutine 4: Fetching news 
+                             fetch_and_write_filings()                                                   # Coroutine 5: Fetch SEC filings metadata
                             )
 
         # We can also execute any function AFTER asyncio.gather() finished like that: 

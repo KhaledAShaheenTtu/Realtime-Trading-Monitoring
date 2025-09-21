@@ -2,3 +2,52 @@
 2025-09-18 03:30:15 Candle of 'BTCUSDT' has written to btcusdt.csv. Now I'm waiting for the next 5 minutes
 2025-09-18 03:30:15 Candle of 'TONUSDT' has written to tonusdt.csv. Now I'm waiting for the next 5 minutes
 2025-09-18 03:30:16 News for BTCUSDT and TONUSDT retrieved from timestamp: 2025-09-18 03:25:00 Now I'm waiting for the next 5 minutes
+2025-09-21 01:32:35 Waiting 159.8 seconds till the next 5 minutes interval before requesting price from the TradingView
+2025-09-21 01:34:08 Candle of 'BINANCE:BTCUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-21 01:30:00+00:00
+2025-09-21 01:34:08 Candle of 'BINANCE:TONUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-21 01:30:00+00:00
+2025-09-21 01:34:09 Candle of 'LSE:MAG7' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-19 15:25:00+00:00
+2025-09-21 01:34:09 News for BTCUSDT and TONUSDT retrieved
+2025-09-21 01:34:10 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_BTC.csv
+2025-09-21 01:34:10 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_TON.csv
+2025-09-21 01:34:10 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_MAG7.csv
+2025-09-21 01:34:10 Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...
+2025-09-21 01:43:18 Candle of 'BINANCE:BTCUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-21 01:40:00+00:00
+2025-09-21 01:43:19 Candle of 'BINANCE:TONUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-21 01:40:00+00:00
+2025-09-21 01:43:20 Candle of 'LSE:MAG7' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-19 15:25:00+00:00
+2025-09-21 01:43:20 News for BTCUSDT and TONUSDT retrieved
+2025-09-21 01:43:21 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_BTC.csv
+2025-09-21 01:43:21 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_TON.csv
+2025-09-21 01:43:21 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_MAG7.csv
+2025-09-21 01:43:21 Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...
+2025-09-21 01:46:45 Candle of 'BINANCE:BTCUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-21 01:45:00+00:00
+2025-09-21 01:46:46 Candle of 'BINANCE:TONUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-21 01:45:00+00:00
+2025-09-21 01:46:47 Candle of 'LSE:MAG7' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-19 15:25:00+00:00
+2025-09-21 01:46:47 News for BTCUSDT and TONUSDT retrieved
+2025-09-21 01:46:48 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_BTC.csv
+2025-09-21 01:46:48 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_TON.csv
+2025-09-21 01:46:48 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_MAG7.csv
+2025-09-21 01:46:48 Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...
+2025-09-21 01:54:57 Candle of 'BINANCE:BTCUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-21 01:50:00+00:00
+2025-09-21 01:54:57 Candle of 'BINANCE:TONUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-21 01:50:00+00:00
+2025-09-21 01:54:58 Candle of 'LSE:MAG7' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-19 15:25:00+00:00
+2025-09-21 01:54:58 News for BTCUSDT and TONUSDT retrieved
+2025-09-21 01:55:12 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
+2025-09-21 01:55:12 Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...
+2025-09-21 01:57:25 Candle of 'BINANCE:BTCUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-21 01:55:00+00:00
+2025-09-21 01:57:25 Candle of 'BINANCE:TONUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-21 01:55:00+00:00
+2025-09-21 01:57:26 Candle of 'LSE:MAG7' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-19 15:25:00+00:00
+2025-09-21 01:57:26 News for BTCUSDT and TONUSDT retrieved
+2025-09-21 01:57:40 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
+2025-09-21 01:57:40 Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...
+2025-09-21 01:59:50 Candle of 'BINANCE:BTCUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-21 01:55:00+00:00
+2025-09-21 01:59:50 Candle of 'BINANCE:TONUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-21 01:55:00+00:00
+2025-09-21 01:59:51 Candle of 'LSE:MAG7' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-19 15:25:00+00:00
+2025-09-21 01:59:52 News for BTCUSDT and TONUSDT retrieved
+2025-09-21 02:00:03 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
+2025-09-21 02:00:03 Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...
+2025-09-21 02:03:04 Candle of 'BINANCE:BTCUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-21 02:00:00+00:00
+2025-09-21 02:03:04 Candle of 'BINANCE:TONUSDT' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-21 02:00:00+00:00
+2025-09-21 02:03:04 Candle of 'LSE:MAG7' has written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-19 15:25:00+00:00
+2025-09-21 02:03:05 News for BTCUSDT and TONUSDT retrieved
+2025-09-21 02:03:16 EDGAR filings written to c:\Users\Faisa\repo\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
+2025-09-21 02:03:16 Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...
