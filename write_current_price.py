@@ -83,7 +83,7 @@ async def fetch_and_write_news(news_limit, file_path):
                 "lang": "EN",
                 "limit": news_limit,
                 "source_ids": "coindesk",
-                "categories": "BTC,TON",
+                "categories": "BTC,TON,MAG7",
                 # "to_ts": to_ts,           # there is no need to send to_ts to get the latest articles 
                 # "api_key": API_KEY,       # for some quota we do not need to provide API key, that should be enough for tests
             },
@@ -100,13 +100,15 @@ async def fetch_and_write_news(news_limit, file_path):
                     instrument = "BTC"
                 elif "TON" in categories:
                     instrument = "TON"
+                elif "MAG7" in categories:
+                    instrument = "MAG7"
                 if instrument:
                     utc_timestamp = datetime.datetime.fromtimestamp(article["PUBLISHED_ON"], 
                                                                     tz=datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
                     source = article.get("SOURCE_DATA", {}).get("NAME", "Unknown")
                     raw_text = article.get("BODY", "")
                     writer.writerow([instrument, utc_timestamp, source, raw_text])
-        dw.write_log_line(text = f"News for BTCUSDT and TONUSDT retrieved")
+        dw.write_log_line(text = f"News for instruments retrieved")
 
     except Exception as e:
         logging.error(f"Error writing getting news: {e}")
@@ -137,7 +139,7 @@ async def fetch_and_write_filings(executor=None):
     return
 
 
-async def main():
+async def main(interval: float = 300.0):
     # This 'now' is only for internal loop to iteratively write prices, so this is the only place we do not convert it to GMT
     now = datetime.datetime.now()                   
     
@@ -159,6 +161,10 @@ async def main():
                              f' 5 minutes interval before requesting price from the TradingView')
     await asyncio.sleep(delay_seconds)  # instead of time.sleep() we now have to use asyncio version
 
+    # Entering the 5 minutes loop (with substraction of execution time)
+    loop = asyncio.get_running_loop()
+    next_run = loop.time()  # стартовая «фаза» сейчас
+
     while True:
         # Executing the tasks (coroutines in terms of asyncio) in parallel using asyncio.gather(task1, task2... taskN)
         await asyncio.gather(make_a_record_from_tv(symbol = "BTCUSDT",                                  # Coroutine 1: Write price of BTCUSDT 
@@ -171,19 +177,22 @@ async def main():
                                                    exchange = "LSE", interval = "5", n_bars = 1, 
                                                    file_path = 'data/mag7.csv'),
                              fetch_and_write_news(news_limit=1, file_path = 'data/news.csv'),           # Coroutine 4: Fetching news 
-                             fetch_and_write_filings()                                                   # Coroutine 5: Fetch SEC filings metadata
+                             fetch_and_write_filings()                                                  # Coroutine 5: Fetch SEC filings metadata
                             )
 
         # We can also execute any function AFTER asyncio.gather() finished like that: 
-        # await fetch_and_write_news(news_limit, file_path = 'data/news.csv')
-        
+        # await fetch_and_write_news(news_limit, file_path = 'data/news.csv')       
+       
         dw.write_log_line(text = f"Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...")
-        
-        await asyncio.sleep(300)                                                             # wait 5 minutes to write the next price
-        # TODO: with such an approach there will be small data drift here cause our tasks takes several seconds, 
-        #   so in total it's not exact 300, its about 303-307 seconds for every 5 minutes
-        #   that would be great to make a single Loop to count the time above asyncio.gather() execution
 
+        next_run += interval
+        now = loop.time()
+        if now > next_run: # in case execution was longer than the whole interval -- skip next run 
+            missed = int((now - next_run) // interval) + 1
+            next_run += missed * interval
+
+        dw.write_log_line(f"Wait time till the next start: {round(max(0.0, next_run - loop.time()), 1)}")
+        await asyncio.sleep(max(0.0, next_run - loop.time()))   # wait 300 seconds minus execution time till the next run
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(main(300))
