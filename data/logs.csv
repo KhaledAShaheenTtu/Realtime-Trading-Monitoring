@@ -265,3 +265,12 @@
 2025-09-23 05:25:37 EDGAR filings written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
 2025-09-23 05:25:37 Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes...
 2025-09-23 05:25:37 Wait time till the next start: 277.5
+2025-09-23 06:03:50 Waiting 84.1 seconds till the next 5 minutes interval before requesting price from the TradingView
+2025-09-23 06:05:15 Candle of 'BINANCE:BTCUSDT' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-23 06:10:00+00:00
+2025-09-23 06:05:15 Candle of 'BINANCE:TONUSDT' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-23 06:10:00+00:00
+2025-09-23 06:05:16 Candle of 'LSE:MAG7' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-22 15:35:00+00:00
+2025-09-23 06:05:17 Fed rates scraped and written: 1 sources to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/fed_rates.csv
+2025-09-23 06:05:18 News for instruments retrieved
+2025-09-23 06:05:34 EDGAR filings written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
+2025-09-23 06:05:34 Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes...
+2025-09-23 06:05:34 Wait time till the next start: 280.7
