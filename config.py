@@ -107,12 +107,12 @@ class Config:
         print(f"Collection Interval: {cls.COLLECTION_INTERVAL}s")
         print(f"Log Level: {cls.LOG_LEVEL}")
         
-        print("\\nAPI Keys Status:")
+        print("\nAPI Keys Status:")
         print(f"  FRED API: {'✅ Set' if cls.FRED_API_KEY else '⚠️ Not set'}")
         print(f"  Alpha Vantage: {'✅ Set' if cls.ALPHA_VANTAGE_API_KEY else '⚠️ Not set'}")
         print(f"  CoinDesk: {'✅ Set' if cls.COINDESK_API_KEY else '⚠️ Not set (using free tier)'}")
         
-        print(f"\\nData Files:")
+        print(f"\nData Files:")
         print(f"  BTC/USDT: {cls.BTCUSDT_FILE}")
         print(f"  TON/USDT: {cls.TONUSDT_FILE}")
         print(f"  MAG7: {cls.MAG7_FILE}")
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     # Print configuration summary
     config.print_config_summary()
     
-    print("\\n" + "=" * 50)
+    print("\n" + "=" * 50)
     print("SETUP INSTRUCTIONS")
     print("=" * 50)
     print("1. Copy .env.example to .env (already done)")

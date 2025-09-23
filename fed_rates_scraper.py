@@ -92,7 +92,7 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
     scraper = FedRatesScaper()
     dw = DataWorks()
     
-    print("\\nFetching Fed rates from public sources (no API key needed)...")
+    print("\nFetching Fed rates from public sources (no API key needed)...")
     
     # Get rates from all available sources
     rates_data = scraper.get_all_available_rates()
@@ -111,16 +111,16 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
         
         with open(file_path, 'a', encoding='utf-8') as f:
             if write_header:
-                f.write("source,rate_value,description,fetch_timestamp_utc\\n")
+                f.write("source,rate_value,description,fetch_timestamp_utc\n")
             
             for rate_data in rates_data:
                 f.write(f"{rate_data['source']},")
                 f.write(f"{rate_data['rate']:.4f},")
                 f.write(f"{rate_data['description']},")
-                f.write(f"{timestamp}\\n")
+                f.write(f"{timestamp}\n")
         
         dw.write_log_line(f"Fed rates scraped and written: {len(rates_data)} sources to {file_path}")
-        print(f"\\n✅ Successfully wrote {len(rates_data)} Fed rate sources to {file_path}")
+        print(f"\n✅ Successfully wrote {len(rates_data)} Fed rate sources to {file_path}")
         
     except Exception as e:
         print(f"❌ Error writing Fed rates to file: {e}")
@@ -140,7 +140,7 @@ def test_fed_rates_scraper():
     # Test all sources
     rates = scraper.get_all_available_rates()
     
-    print(f"\\n📊 RESULTS SUMMARY:")
+    print(f"\n📊 RESULTS SUMMARY:")
     print("=" * 50)
     
     if rates:
@@ -150,7 +150,7 @@ def test_fed_rates_scraper():
             print(f"   • {rate_data['source']}: {rate_data['rate']:.3f}%")
             print(f"     {rate_data['description']}")
         
-        print(f"\\n🔄 TESTING ASYNC INTEGRATION:")
+        print(f"\n🔄 TESTING ASYNC INTEGRATION:")
         asyncio.run(fetch_and_write_fed_rates_scraper("data/test_fed_rates_scraper.csv"))
         
     else:
@@ -160,7 +160,7 @@ def test_fed_rates_scraper():
         print("• Network connectivity issues") 
         print("• Rate limiting from sources")
     
-    print(f"\\n✅ Fed rates scraper test completed!")
+    print(f"\n✅ Fed rates scraper test completed!")
 
 if __name__ == "__main__":
     print("FED RATES SCRAPER ENDPOINT")

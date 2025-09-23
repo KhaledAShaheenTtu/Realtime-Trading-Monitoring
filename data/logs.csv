@@ -249,3 +249,19 @@
 2025-09-23 05:15:33 EDGAR filings written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
 2025-09-23 05:15:33 Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes...
 2025-09-23 05:15:33 Wait time till the next start: 281.7
+2025-09-23 05:20:15 Candle of 'BINANCE:BTCUSDT' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-23 05:25:00+00:00
+2025-09-23 05:20:15 Candle of 'BINANCE:TONUSDT' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-23 05:25:00+00:00
+2025-09-23 05:20:16 Candle of 'LSE:MAG7' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-22 15:35:00+00:00
+2025-09-23 05:20:17 Fed rates scraped and written: 1 sources to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/fed_rates.csv
+2025-09-23 05:20:18 News for instruments retrieved
+2025-09-23 05:20:32 EDGAR filings written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
+2025-09-23 05:20:32 Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes...
+2025-09-23 05:20:32 Wait time till the next start: 282.5
+2025-09-23 05:25:15 Candle of 'BINANCE:BTCUSDT' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/btcusdt.csv with the time 2025-09-23 05:30:00+00:00
+2025-09-23 05:25:15 Candle of 'BINANCE:TONUSDT' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/tonusdt.csv with the time 2025-09-23 05:30:00+00:00
+2025-09-23 05:25:16 Candle of 'LSE:MAG7' has written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/mag7.csv with the time 2025-09-22 15:35:00+00:00
+2025-09-23 05:25:17 Fed rates scraped and written: 1 sources to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/fed_rates.csv
+2025-09-23 05:25:19 News for instruments retrieved
+2025-09-23 05:25:37 EDGAR filings written to C:\Users\edwin\Desktop\Realtime-Trading-Monitoring\data/sec_filings_combined.csv
+2025-09-23 05:25:37 Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes...
+2025-09-23 05:25:37 Wait time till the next start: 277.5
