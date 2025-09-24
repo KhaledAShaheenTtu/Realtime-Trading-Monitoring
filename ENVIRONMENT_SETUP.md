@@ -47,23 +47,6 @@ conda activate trading-monitor
 python write_current_price.py
 ```
 
-
-### 3. Configure API Keys (Optional but Recommended)
-
-#### FRED API (Federal Reserve Data) - Free
-```bash
-# 1. Get free API key: https://fred.stlouisfed.org/docs/api/api_key.html
-# 2. Add to .env file:
-FRED_API_KEY=your_actual_fred_api_key_here
-```
-
-#### Alpha Vantage API - Free Tier Available
-```bash
-# 1. Get free API key: https://www.alphavantage.co/support/#api-key
-# 2. Add to .env file:
-ALPHA_VANTAGE_API_KEY=your_actual_alpha_vantage_key_here
-```
-
 ## 📊 Current Configuration
 
 ### Data Collection Settings
