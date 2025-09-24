@@ -33,26 +33,20 @@ The project includes:
 - `.env` - Your actual configuration (already created)
 - `config.py` - Configuration module that loads .env values
 
-### 2. Environment Setup Options
+### 2. Environment Setup
 
-#### Option A: Anaconda (Recommended)
 ```bash
-# First-time setup
+# Automated setup (recommended)
 ./setup_environment.sh
 
-# Daily usage
+# Run the application
 ./run_app.sh
 
-# Or manual activation
+# Or manual steps
 conda activate trading-monitor
 python write_current_price.py
 ```
 
-#### Option B: Traditional pip (Legacy)
-```bash
-pip install -r requirements.txt
-python write_current_price.py
-```
 
 ### 3. Configure API Keys (Optional but Recommended)
 
@@ -101,7 +95,6 @@ RETRY_DELAY=5                 # Seconds between retries
 
 ## 🚀 Usage
 
-### With Anaconda (Recommended)
 ```bash
 # Quick start - runs everything automatically
 ./run_app.sh
@@ -112,11 +105,6 @@ python config.py          # Test configuration
 python write_current_price.py  # Run main application
 ```
 
-### Traditional Usage
-```bash
-python config.py
-python write_current_price.py
-```
 
 ### What the Application Does:
 1. Load configuration from .env file
@@ -137,11 +125,13 @@ python write_current_price.py
 ```
 ├── .env                    # Your actual configuration
 ├── .env.example           # Configuration template
+├── environment.yml        # Conda environment specification
 ├── config.py              # Configuration loader
-├── requirements.txt       # Python dependencies
-├── write_current_price.py # Main application (updated)
-├── fed_rates_api.py       # Fed rates (updated)
-├── fed_rates_scraper.py   # Fed rates scraper (updated)
+├── setup_environment.sh   # Automated environment setup
+├── run_app.sh             # Application launcher
+├── write_current_price.py # Main application
+├── fed_rates_api.py       # Fed rates collector
+├── fed_rates_scraper.py   # Fed rates scraper
 └── data/                  # Data output directory
 ```
 
@@ -204,15 +194,10 @@ conda activate trading-monitor
 python write_current_price.py
 ```
 
-### Traditional Issues
-
 #### "Module not found" error
 ```bash
-# With conda (recommended)
+# Ensure conda environment is activated
 conda activate trading-monitor
-
-# With pip (legacy)
-pip install python-dotenv
 ```
 
 ### Configuration Issues

@@ -94,8 +94,3 @@ python-dotenv>=1.0.0
 jupyter, matplotlib, seaborn, plotly
 ```
 
-### Legacy pip Installation (Not Recommended)
-If you prefer pip, use:
-```bash
-pip install -r requirements.txt
-```
