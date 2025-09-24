@@ -1,11 +1,7 @@
 import requests
-import pandas as pd
 import datetime
-import json
 import os
 import asyncio
-import re
-from bs4 import BeautifulSoup
 from trading_data_classes import DataWorks
 from config import config
 
