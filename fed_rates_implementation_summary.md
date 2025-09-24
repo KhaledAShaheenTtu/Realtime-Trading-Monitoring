@@ -4,20 +4,14 @@
 
 ### **What Was Built:**
 
-1. **Primary Fed Rates API (`fed_rates_api.py`)**
-   - Official FRED (Federal Reserve) API implementation
-   - Requires free API key from https://fred.stlouisfed.org/docs/api/api_key.html
-   - Fetches official Fed funds rate, Treasury yields, and balance sheet data
-   - *Note: Demo key didn't work, but production keys will*
-
-2. **Alternative Fed Rates Scraper (`fed_rates_scraper.py`)** ✅ **WORKING**
+1. **Alternative Fed Rates Scraper (`fed_rates_scraper.py`)** ✅ **WORKING**
    - No API key required
    - Multi-source data collection from:
      - ✅ **Yahoo Finance** (13-Week Treasury Bill Rate: 3.848%)
    - Async/await compatible
    - Writes to CSV format matching your existing data structure
 
-3. **Main Script Integration (`write_current_price.py`)**
+2. **Main Script Integration (`write_current_price.py`)**
    - Added Fed rates collection as Coroutine 4
    - Collects Fed rates every 5 minutes alongside other data
    - Updated logging to reflect Fed rates collection
@@ -61,15 +55,7 @@ python fed_rates_scraper.py
 python test_fed_integration.py
 ```
 
-**Set Up Official FRED API (Optional):**
-```bash
-# Get free key from https://fred.stlouisfed.org/docs/api/api_key.html
-$env:FRED_API_KEY='your_key_here'
-python fed_rates_api.py
-```
-
 ### **Files Created:**
-- `fed_rates_api.py` - Official FRED API implementation
 - `fed_rates_scraper.py` - Working scraper implementation  
 - `test_fed_integration.py` - Integration test
 - `fed_rates_implementation_summary.md` - This document

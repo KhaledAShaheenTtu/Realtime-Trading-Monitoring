@@ -130,7 +130,6 @@ python write_current_price.py  # Run main application
 ├── setup_environment.sh   # Automated environment setup
 ├── run_app.sh             # Application launcher
 ├── write_current_price.py # Main application
-├── fed_rates_api.py       # Fed rates collector
 ├── fed_rates_scraper.py   # Fed rates scraper
 └── data/                  # Data output directory
 ```
@@ -205,10 +204,5 @@ conda activate trading-monitor
 2. Run `python config.py` to validate
 3. Ensure no extra quotes around values
 4. Verify conda environment is activated
-
-### API key not working
-1. Verify key is correct in `.env` file
-2. Check API service status
-3. Fallback sources will be used automatically
 
 Your environment configuration is now fully set up and integrated! 🎉

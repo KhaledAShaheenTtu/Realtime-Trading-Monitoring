@@ -14,18 +14,6 @@ load_dotenv(dotenv_path=env_path)
 class Config:
     """Configuration class to centralize all environment variables"""
     
-    # API Keys
-    FRED_API_KEY = os.getenv('FRED_API_KEY', '')
-    ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY', '')
-    COINDESK_API_KEY = os.getenv('COINDESK_API_KEY', '')
-    
-    # TradingView Credentials
-    TRADINGVIEW_USERNAME = os.getenv('TRADINGVIEW_USERNAME', '')
-    TRADINGVIEW_PASSWORD = os.getenv('TRADINGVIEW_PASSWORD', '')
-    
-    # Database
-    DATABASE_URL = os.getenv('DATABASE_URL', '')
-    
     # Logging
     LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
     LOG_FILE_PATH = os.getenv('LOG_FILE_PATH', 'data/logs.csv')
@@ -107,10 +95,6 @@ class Config:
         print(f"Collection Interval: {cls.COLLECTION_INTERVAL}s")
         print(f"Log Level: {cls.LOG_LEVEL}")
         
-        print("\nAPI Keys Status:")
-        print(f"  FRED API: {'✅ Set' if cls.FRED_API_KEY else '⚠️ Not set'}")
-        print(f"  Alpha Vantage: {'✅ Set' if cls.ALPHA_VANTAGE_API_KEY else '⚠️ Not set'}")
-        print(f"  CoinDesk: {'✅ Set' if cls.COINDESK_API_KEY else '⚠️ Not set (using free tier)'}")
         
         print(f"\nData Files:")
         print(f"  BTC/USDT: {cls.BTCUSDT_FILE}")
@@ -154,6 +138,4 @@ if __name__ == "__main__":
     print("=" * 50)
     print("1. Copy .env.example to .env (already done)")
     print("2. Edit .env file with your API keys:")
-    print("   • FRED_API_KEY: https://fred.stlouisfed.org/docs/api/api_key.html")
-    print("   • ALPHA_VANTAGE_API_KEY: https://www.alphavantage.co/support/#api-key")
     print("3. Restart your application to reload configuration")
