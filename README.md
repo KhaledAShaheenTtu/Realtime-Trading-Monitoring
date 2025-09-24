@@ -1,19 +1,35 @@
 # Realtime-Trading-Monitoring
 
-
 Our plan is to collect 4 datasets, then merge them together to extract some value.
 
 ## Part 1. Price for several instruments from the exchange
 
 It’s better to use crypto, since it trades 24/7 and doesn’t depend on a market calendar. We chose Binance because it provides price data without authentication (no API key required).
 
-You can start the script from the console as follows:
+## 🚀 Quick Start with Anaconda (Recommended)
 
-```python
-python .\write_current_price.py
+### Option 1: Automated Setup
+```bash
+# Set up the conda environment (first time only)
+./setup_environment.sh
+
+# Run the application
+./run_app.sh
 ```
 
-Script supposed to be running all time  to write enough rows (1 row per 5 min). See TODO section.
+### Option 2: Manual Setup
+```bash
+# Create conda environment from environment.yml
+conda env create -f environment.yml
+
+# Activate the environment
+conda activate trading-monitor
+
+# Run the application
+python write_current_price.py
+```
+
+Script is designed to run continuously to collect data every 5 minutes. See TODO section for improvements.
 
 What does it do? 
 
@@ -43,21 +59,38 @@ To be done
 To be done 
 
 
-## Dependencies
+## 📦 Environment & Dependencies
 
-Python modules (lastest versions as of 2025-09-10):
+### Anaconda Environment (Recommended)
+This project uses Anaconda for dependency management and isolated environments.
 
-```python 
-logging
-time
-datetime
-json
-random
-re
-string
-pandas
+**Key Benefits:**
+- 🔒 Isolated environment prevents conflicts
+- 📦 Optimized package versions from conda-forge
+- 🚀 Easy setup and reproducible environments
+- 🧪 Includes Jupyter for data analysis
 
-# Could be out of stardard Conda package, but could be installed from Conda
-requests
-websocket
+**Environment Details:**
+- Python 3.11
+- Environment name: `trading-monitor`
+- All dependencies managed via `environment.yml`
+
+### Core Dependencies
+```yaml
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Web APIs & Scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+websocket-client>=1.6.0
+
+# Configuration
+python-dotenv>=1.0.0
+
+# Analysis Tools
+jupyter, matplotlib, seaborn, plotly
 ```
+

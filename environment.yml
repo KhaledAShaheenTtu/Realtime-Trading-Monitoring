@@ -1,0 +1,45 @@
+name: trading-monitor
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Python version
+  - python=3.11
+  
+  # Core data processing libraries (conda-forge preferred for latest versions)
+  - pandas>=2.0.0
+  - numpy>=1.24.0
+  
+  # HTTP requests and web APIs
+  - requests>=2.31.0
+  
+  # Web scraping and HTML parsing
+  - beautifulsoup4>=4.12.0
+  - lxml>=4.9.0
+  
+  # Environment variables management
+  - python-dotenv>=1.0.0
+  
+  # Development and analysis tools
+  - jupyter
+  - ipykernel
+  
+  # Additional useful packages for data analysis
+  - matplotlib
+  - seaborn
+  - plotly
+  
+  # Async programming support
+  - aiohttp
+  
+  # Pip dependencies (packages not available in conda)
+  - pip
+  - pip:
+    - websocket-client>=1.6.0
+    # Add any other pip-only packages here if needed
+
+# Environment variables for conda
+variables:
+  # Set conda environment variables if needed
+  CONDA_ENV_NAME: trading-monitor
+  PYTHONPATH: ${CONDA_PREFIX}/lib/python3.11/site-packages

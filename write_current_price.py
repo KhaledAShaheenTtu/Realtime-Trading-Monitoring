@@ -10,6 +10,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Our own classes to gather some data 
 from trading_data_classes import GetDataTradingView, DataWorks
+from fed_rates_scraper import fetch_and_write_fed_rates_scraper
+from config import config
 # EDGAR client for SEC filings metadata
 import edgar_client
 
@@ -169,21 +171,22 @@ async def main(interval: float = 300.0):
         # Executing the tasks (coroutines in terms of asyncio) in parallel using asyncio.gather(task1, task2... taskN)
         await asyncio.gather(make_a_record_from_tv(symbol = "BTCUSDT",                                  # Coroutine 1: Write price of BTCUSDT 
                                                    exchange = "BINANCE", interval = "5", n_bars = 1, 
-                                                   file_path = 'data/btcusdt.csv'), 
+                                                   file_path = config.BTCUSDT_FILE), 
                              make_a_record_from_tv(symbol = "TONUSDT",                                  # Coroutine 2: Write price of TONUSDT
                                                    exchange = "BINANCE", interval = "5", n_bars = 1, 
-                                                   file_path = 'data/tonusdt.csv'),
+                                                   file_path = config.TONUSDT_FILE),
                              make_a_record_from_tv(symbol = "MAG7",                                     # Coroutine 3: Write price of MAG7
                                                    exchange = "LSE", interval = "5", n_bars = 1, 
-                                                   file_path = 'data/mag7.csv'),
-                             fetch_and_write_news(news_limit=1, file_path = 'data/news.csv'),           # Coroutine 4: Fetching news 
-                             fetch_and_write_filings()                                                  # Coroutine 5: Fetch SEC filings metadata
+                                                   file_path = config.MAG7_FILE),
+                             fetch_and_write_fed_rates_scraper(file_path=config.FED_RATES_FILE),        # Coroutine 4: Fetch Fed rates from Yahoo Finance
+                             fetch_and_write_news(news_limit=config.NEWS_FETCH_LIMIT, file_path=config.NEWS_FILE), # Coroutine 5: Fetching news 
+                             fetch_and_write_filings()                                                  # Coroutine 6: Fetch SEC filings metadata
                             )
 
         # We can also execute any function AFTER asyncio.gather() finished like that: 
         # await fetch_and_write_news(news_limit, file_path = 'data/news.csv')       
        
-        dw.write_log_line(text = f"Gathering prices and news has finished, Now I'm waiting for the next 5 minutes...")
+        dw.write_log_line(text = f"Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes...")
 
         next_run += interval
         now = loop.time()
@@ -195,4 +198,12 @@ async def main(interval: float = 300.0):
         await asyncio.sleep(max(0.0, next_run - loop.time()))   # wait 300 seconds minus execution time till the next run
 
 if __name__ == '__main__':
-    asyncio.run(main(300))
+    # Print configuration summary
+    print("REALTIME TRADING MONITORING")
+    print("=" * 50)
+    config.print_config_summary()
+    print("\n" + "=" * 50)
+    print("STARTING DATA COLLECTION...")
+    print("=" * 50)
+    
+    asyncio.run(main(config.COLLECTION_INTERVAL))
