@@ -1,5 +1,26 @@
 # Environment Configuration Guide
 
+## 🚀 Anaconda Environment Setup (Recommended)
+
+This project has been refactored to use Anaconda for optimal dependency management and environment isolation.
+
+### Quick Setup
+```bash
+# Automated setup (recommended)
+./setup_environment.sh
+
+# Or manual setup
+conda env create -f environment.yml
+conda activate trading-monitor
+```
+
+### Benefits of Using Anaconda
+- ✅ **Isolated Environment**: No conflicts with system Python
+- ✅ **Optimized Packages**: Pre-compiled binaries from conda-forge
+- ✅ **Reproducible**: Same environment across different machines
+- ✅ **Jupyter Integration**: Built-in support for data analysis
+- ✅ **Easy Management**: Simple activate/deactivate workflow
+
 ## ✅ .env File Successfully Added!
 
 This project now uses environment variables for configuration management, making it more secure and flexible.
@@ -12,9 +33,25 @@ The project includes:
 - `.env` - Your actual configuration (already created)
 - `config.py` - Configuration module that loads .env values
 
-### 2. Install Dependencies
+### 2. Environment Setup Options
+
+#### Option A: Anaconda (Recommended)
+```bash
+# First-time setup
+./setup_environment.sh
+
+# Daily usage
+./run_app.sh
+
+# Or manual activation
+conda activate trading-monitor
+python write_current_price.py
+```
+
+#### Option B: Traditional pip (Legacy)
 ```bash
 pip install -r requirements.txt
+python write_current_price.py
 ```
 
 ### 3. Configure API Keys (Optional but Recommended)
@@ -64,21 +101,30 @@ RETRY_DELAY=5                 # Seconds between retries
 
 ## 🚀 Usage
 
-### Test Configuration
+### With Anaconda (Recommended)
 ```bash
-python config.py
+# Quick start - runs everything automatically
+./run_app.sh
+
+# Or step by step
+conda activate trading-monitor
+python config.py          # Test configuration
+python write_current_price.py  # Run main application
 ```
 
-### Run Main Application
+### Traditional Usage
 ```bash
+python config.py
 python write_current_price.py
 ```
 
-The application will now:
+### What the Application Does:
 1. Load configuration from .env file
-2. Display configuration summary on startup
-3. Use configured file paths and settings
-4. Handle API keys securely
+2. Activate the optimized conda environment
+3. Display configuration summary on startup
+4. Use configured file paths and settings
+5. Handle API keys securely
+6. Collect data every 5 minutes automatically
 
 ## 🔒 Security Features
 
@@ -130,15 +176,50 @@ LOG_LEVEL=ERROR
 
 ## 🛠️ Troubleshooting
 
-### "Module not found" error
+### Anaconda Issues
+
+#### Environment not found
 ```bash
+# List available environments
+conda env list
+
+# Recreate if missing
+./setup_environment.sh
+```
+
+#### "conda: command not found"
+```bash
+# Initialize conda in your shell
+conda init zsh  # or bash
+# Restart terminal
+```
+
+#### Activation script fails
+```bash
+# Make scripts executable
+chmod +x run_app.sh setup_environment.sh
+
+# Or run manually
+conda activate trading-monitor
+python write_current_price.py
+```
+
+### Traditional Issues
+
+#### "Module not found" error
+```bash
+# With conda (recommended)
+conda activate trading-monitor
+
+# With pip (legacy)
 pip install python-dotenv
 ```
 
-### Configuration not loading
+### Configuration Issues
 1. Check `.env` file exists in project root
 2. Run `python config.py` to validate
 3. Ensure no extra quotes around values
+4. Verify conda environment is activated
 
 ### API key not working
 1. Verify key is correct in `.env` file
