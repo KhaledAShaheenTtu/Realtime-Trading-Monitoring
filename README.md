@@ -1,6 +1,5 @@
 # Realtime-Trading-Monitoring
 
-
 Our plan is to collect 4 datasets, then merge them together to extract some value.
 
 ## Part 1. Price for several instruments from the exchange
