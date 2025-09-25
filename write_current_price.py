@@ -75,7 +75,8 @@ async def fetch_and_write_news(news_limit, file_path):
     """
     try:
         print(f"Fetching the latest news...")
-        output_csv = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
+        # Resolve output path relative to this file if not absolute
+        output_csv = file_path if os.path.isabs(file_path) else os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
 
         # API_KEY = ""
 
@@ -92,9 +93,12 @@ async def fetch_and_write_news(news_limit, file_path):
             headers={"Content-type": "application/json; charset=UTF-8"}
         )
         json_response = response.json()
-        with open(output_csv, mode="w", newline="", encoding="utf-8") as f:
+        # Determine whether to write header
+        write_header = (not os.path.exists(output_csv)) or os.path.getsize(output_csv) == 0
+        with open(output_csv, mode="a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-            writer.writerow(["instrument", "utc_timestamp", "source", "raw_text"])
+            if write_header:
+                writer.writerow(["instrument", "utc_timestamp", "source", "raw_text"])
             for article in json_response.get("Data", []):
                 categories = [c["CATEGORY"] for c in article.get("CATEGORY_DATA", [])]
                 instrument = None
@@ -119,6 +123,10 @@ async def fetch_and_write_news(news_limit, file_path):
     return 
 
 
+def _resolve_path(p: str) -> str:
+    return p if os.path.isabs(p) else os.path.join(os.path.dirname(os.path.abspath(__file__)), p)
+
+
 async def fetch_and_write_filings(executor=None):
     """Fetch SEC filings metadata for BTC, TON and MAG7 and write CSV files.
 
@@ -131,8 +139,21 @@ async def fetch_and_write_filings(executor=None):
         executor = ThreadPoolExecutor(max_workers=3)
 
     tasks = []
-    # One combined CSV with instrument column and UTC filedDate
-    tasks.append(loop.run_in_executor(executor, edgar_client.get_and_write_combined_btc_ton_mag7, 'data', 50, 50, 20))
+    # One combined CSV with instrument column and UTC filedDate. Use config for limits and output path.
+    output_file = _resolve_path(config.FILINGS_FILE)
+    tasks.append(
+        loop.run_in_executor(
+            executor,
+            edgar_client.get_and_write_combined_btc_ton_mag7,
+            config.DATA_DIR,
+            config.FILINGS_BTC_LIMIT,
+            config.FILINGS_TON_LIMIT,
+            config.FILINGS_MAG7_EACH_LIMIT,
+            output_file,
+            True,
+            True,
+        )
+    )
 
     results = await asyncio.gather(*tasks)
     for r in results:

@@ -243,8 +243,21 @@ def get_and_write_filings_for_ciks(ciks: List[str], instrument: str, output_dir:
     return output_path
 
 
-def get_and_write_combined_btc_ton_mag7(output_dir: str = 'data', btc_limit: int = 50, ton_limit: int = 50, mag7_limit_each: int = 20) -> Optional[str]:
+def get_and_write_combined_btc_ton_mag7(
+    output_dir: str = 'data',
+    btc_limit: int = 50,
+    ton_limit: int = 50,
+    mag7_limit_each: int = 20,
+    output_file: Optional[str] = None,
+    append: bool = True,
+    dedupe_existing: bool = True,
+) -> Optional[str]:
     """Fetch BTC and TON via keyword search and MAG7 via CIK list, combine into one CSV with instrument column.
+
+    - output_file: if provided, write to this path (relative paths are resolved next to this module); otherwise, use
+      f"{output_dir}/sec_filings_combined.csv".
+    - append: when True, append to an existing file and write header only if the file is empty; otherwise overwrite.
+    - dedupe_existing: when True and appending, skip rows already present in the existing file by key (accessionNumber, instrument).
 
     Returns the output file path or None if no filings found across all instruments.
     """
@@ -290,18 +303,67 @@ def get_and_write_combined_btc_ton_mag7(output_dir: str = 'data', btc_limit: int
         return x.get('filedDate') or ''
     unique.sort(key=filed_key, reverse=True)
 
-    # Write combined
-    output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{output_dir}/sec_filings_combined.csv")
-    # Ensure instrument column is in headers first
+    # Resolve output path
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    if output_file:
+        # Use provided path, resolve relative to module directory
+        output_path = output_file if os.path.isabs(output_file) else os.path.join(base_dir, output_file)
+    else:
+        output_path = os.path.join(base_dir, f"{output_dir}/sec_filings_combined.csv")
+
+    # Prepare headers
     preferred = ['instrument', 'companyName', 'cik', 'form', 'filedDate', 'accessionNumber', 'reportDate', 'primaryDocument', 'primaryDocDescription', 'primaryDocumentUrl', 'detail_url']
     headers = list({k for f in unique for k in f.keys()})
     ordered = [p for p in preferred if p in headers] + sorted([h for h in headers if h not in preferred])
+
     _ensure_output_path(output_path)
-    with open(output_path, 'w', newline='', encoding='utf-8') as f:
+
+    file_exists = os.path.exists(output_path) and os.path.getsize(output_path) > 0
+
+    # If appending and file exists, preserve existing header order and dedupe
+    existing_header = None
+    existing_keys = set()
+    if append and file_exists:
+        try:
+            with open(output_path, 'r', newline='', encoding='utf-8') as rf:
+                reader = csv.reader(rf)
+                existing_header = next(reader, None)
+                if existing_header:
+                    # Build index map
+                    try:
+                        acc_idx = existing_header.index('accessionNumber')
+                    except ValueError:
+                        acc_idx = None
+                    try:
+                        inst_idx = existing_header.index('instrument')
+                    except ValueError:
+                        inst_idx = None
+                    for row in reader:
+                        if acc_idx is not None and inst_idx is not None and len(row) > max(acc_idx, inst_idx):
+                            existing_keys.add((row[acc_idx], row[inst_idx]))
+                        elif acc_idx is not None and len(row) > acc_idx:
+                            existing_keys.add((row[acc_idx], None))
+        except Exception:
+            # If reading existing file fails, proceed without dedupe preservation
+            existing_header = None
+            existing_keys = set()
+
+    write_header_now = not (append and file_exists)
+
+    with open(output_path, 'a' if append else 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        writer.writerow(ordered)
+        header_to_use = existing_header if (append and file_exists and existing_header) else ordered
+        if write_header_now:
+            writer.writerow(header_to_use)
+
+        # Write rows, respecting header order and dedupe if requested
         for fil in unique:
-            writer.writerow([fil.get(h, '') for h in ordered])
+            key = (fil.get('accessionNumber'), fil.get('instrument'))
+            if dedupe_existing and (append and file_exists) and (key in existing_keys):
+                continue
+            row = [fil.get(h, '') for h in header_to_use]
+            writer.writerow(row)
+
     return output_path
 
 

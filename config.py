@@ -21,6 +21,10 @@ class Config:
     # Data Collection Settings
     COLLECTION_INTERVAL = int(os.getenv('COLLECTION_INTERVAL', '300'))
     NEWS_FETCH_LIMIT = int(os.getenv('NEWS_FETCH_LIMIT', '1'))
+    # SEC Filings limits
+    FILINGS_BTC_LIMIT = int(os.getenv('FILINGS_BTC_LIMIT', '50'))
+    FILINGS_TON_LIMIT = int(os.getenv('FILINGS_TON_LIMIT', '50'))
+    FILINGS_MAG7_EACH_LIMIT = int(os.getenv('FILINGS_MAG7_EACH_LIMIT', '20'))
     
     # File Paths
     DATA_DIR = os.getenv('DATA_DIR', 'data')
@@ -103,6 +107,10 @@ class Config:
         print(f"  Fed Rates: {cls.FED_RATES_FILE}")
         print(f"  News: {cls.NEWS_FILE}")
         print(f"  SEC Filings: {cls.FILINGS_FILE}")
+        print(f"\nFilings Limits:")
+        print(f"  BTC limit: {cls.FILINGS_BTC_LIMIT}")
+        print(f"  TON limit: {cls.FILINGS_TON_LIMIT}")
+        print(f"  MAG7 per CIK limit: {cls.FILINGS_MAG7_EACH_LIMIT}")
 
 # Create a global config instance
 config = Config()
