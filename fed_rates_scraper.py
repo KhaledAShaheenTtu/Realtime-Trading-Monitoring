@@ -71,7 +71,7 @@ class FedRatesScaper:
                 rate_data = fetch_func()
                 
                 if rate_data:
-                    print(f"✅ {source_name}: {rate_data['rate']:.3f}% ({rate_data['description']})")
+                    print(f"{source_name}: {rate_data['rate']:.3f}% ({rate_data['description']})")
                     successful_rates.append(rate_data)
                 else:
                     print(f"❌ {source_name}: No data")
@@ -99,13 +99,13 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
     
     # Write to CSV file
     try:
-        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
+        full_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
         timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         
         # Create header if file doesn't exist
-        write_header = not os.path.exists(file_path) or os.path.getsize(file_path) == 0
+        write_header = not os.path.exists(full_file_path) or os.path.getsize(full_file_path) == 0
         
-        with open(file_path, 'a', encoding='utf-8') as f:
+        with open(full_file_path, 'a', encoding='utf-8') as f:
             if write_header:
                 f.write("source,rate_value,description,fetch_timestamp_utc\n")
             
@@ -115,8 +115,8 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
                 f.write(f"{rate_data['description']},")
                 f.write(f"{timestamp}\n")
         
-        dw.write_log_line(f"Fed rates scraped and written: {len(rates_data)} sources to {file_path}")
-        print(f"\n✅ Successfully wrote {len(rates_data)} Fed rate sources to {file_path}")
+        dw.write_log_line(f"Fed rates scraped and written: {len(rates_data)} sources to the file: {file_path}")
+        print(f"Successfully wrote {len(rates_data)} Fed rate sources to {file_path}")
         
     except Exception as e:
         print(f"❌ Error writing Fed rates to file: {e}")

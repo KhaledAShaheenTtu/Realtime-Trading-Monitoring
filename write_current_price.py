@@ -29,13 +29,13 @@ async def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
         n_bars = n_bars,        #  How many bars (candles) we're requesting: 
                                 #               1 --> only the last one, up to 10_000 --> for history (paywall after ~10k)
     )
-    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
+    full_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_path)
     try: 
         timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         write_header = False
-        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+        if not os.path.exists(full_file_path) or os.path.getsize(full_file_path) == 0:
             write_header = True
-        with open(file_path, 'a', encoding='utf-8') as f:
+        with open(full_file_path, 'a', encoding='utf-8') as f:
             if write_header:
                 f.write("instrument,timestamp_utc,open_price,high_price,low_price,close_price,record_timestamp_utc\n")
 
@@ -57,8 +57,7 @@ async def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
                         f'{pd.to_datetime(idx)},'
                         f'{row.iloc[1]},{row.iloc[2]},{row.iloc[3]},{row.iloc[4]},'
                         f'{timestamp}\n')
-        dw.write_log_line(text = f"Candle of '{row.iloc[0]}' has written to {file_path}"
-                                 f" with the time {pd.to_datetime(idx)}")
+        dw.write_log_line(text = f"Candle of '{row.iloc[0]}' has written to the file {file_path} with the time {pd.to_datetime(idx)}")
 
     except Exception as e:
         logging.error(f"Error writing to log file: {e}")
@@ -158,7 +157,7 @@ async def fetch_and_write_filings(executor=None):
     results = await asyncio.gather(*tasks)
     for r in results:
         if r:
-            dw.write_log_line(text = f"EDGAR filings written to {r}")
+            dw.write_log_line(text = f"EDGAR filings written to:  {r[-29:]}") # last 29 symbols of path
     return
 
 
@@ -182,11 +181,13 @@ async def main(interval: float = 300.0):
     delay_seconds = (scheduled_time - now).total_seconds()
     dw.write_log_line(text = f'Waiting {round(delay_seconds, 1)} seconds till the next'
                              f' 5 minutes interval before requesting price from the TradingView')
+    
+    # Comment this out this raw for immidiate start (skip wait for 1st round interval)
     await asyncio.sleep(delay_seconds)  # instead of time.sleep() we now have to use asyncio version
 
     # Entering the 5 minutes loop (with substraction of execution time)
     loop = asyncio.get_running_loop()
-    next_run = loop.time()  # стартовая «фаза» сейчас
+    next_run = loop.time()  # start phase is now
 
     while True:
         # Executing the tasks (coroutines in terms of asyncio) in parallel using asyncio.gather(task1, task2... taskN)
@@ -207,7 +208,7 @@ async def main(interval: float = 300.0):
         # We can also execute any function AFTER asyncio.gather() finished like that: 
         # await fetch_and_write_news(news_limit, file_path = 'data/news.csv')       
        
-        dw.write_log_line(text = f"Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes...")
+        dw.write_log_line(text = f"{"="*50} \nGathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... \n{"="*50} ")
 
         next_run += interval
         now = loop.time()
