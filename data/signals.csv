@@ -1,0 +1,2 @@
+instrument_btc,timestamp_utc,open_price_btc,high_price_btc,low_price_btc,close_price_btc,record_timestamp_utc_btc,instrument_ton,open_price_ton,high_price_ton,low_price_ton,close_price_ton,record_timestamp_utc_ton,RSI_dd_strat,BB_basis,BB_upper,BB_lower,buy_signal_btc,sell_signal_btc,buy_signal_ton,sell_signal_ton
+BINANCE:BTCUSDT,2025-09-20 15:30:00+00:00,116110.01,116119.3,116044.69,116044.7,2025-09-20 17:53:42,BINANCE:TONUSDT,3.109,3.11,3.106,3.108,2025-09-20 17:53:42,0.0,3.095636363636364,3.1066642460572917,3.084608481215436,0,0,0,1
