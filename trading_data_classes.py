@@ -341,3 +341,43 @@ class DataWorks:
         """
         dt = datetime.datetime.fromtimestamp(timestamp / 1000.0, tz=datetime.timezone.utc) # 
         return dt.strftime('%Y-%m-%d %H:%M:%S.%f')         # Convert to ISO timestamp
+
+
+class Strategy:
+
+    def calculate_rsi(self, prices, period):
+        delta = prices.diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+        rs = gain / loss
+        rsi = 100 - (100 / (1 + rs))
+        return rsi
+
+    def calculate_bollinger_bands(self, prices, period, std_dev):
+        sma = prices.rolling(window=period).mean()
+        rolling_std = prices.rolling(window=period).std()
+        upper_band = sma + (rolling_std * std_dev)
+        lower_band = sma - (rolling_std * std_dev)
+        return sma, upper_band, lower_band
+        
+    def apply_values_for_double_strat(self, data, close_price_field, instrument):   
+        RSI_period = 3
+        Bollinger_period = 165
+        Bollinger_std_dev = 2
+        RSI_overbought = 50
+        RSI_oversold = 49
+        
+        data['RSI_dd_strat'] = self.calculate_rsi(data[close_price_field], RSI_period)
+        data['BB_basis'], data['BB_upper'], data['BB_lower']= self.calculate_bollinger_bands(
+            data[close_price_field], 
+            Bollinger_period, 
+            Bollinger_std_dev)
+
+        buy_signal_field_name = 'buy_signal_' + instrument
+        sell_signal_field_name = 'sell_signal_' + instrument
+
+        data[buy_signal_field_name] = ((data['RSI_dd_strat'] > RSI_oversold) 
+                                            & (data[close_price_field] < data['BB_lower'])).astype('int')
+        data[sell_signal_field_name] = ((data['RSI_dd_strat'] < RSI_overbought) 
+                                            & (data[close_price_field] > data['BB_upper'])).astype('int')
+        return data

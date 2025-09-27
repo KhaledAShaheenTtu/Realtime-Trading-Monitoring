@@ -9,7 +9,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 # Our own classes to gather some data 
-from trading_data_classes import GetDataTradingView, DataWorks
+from trading_data_classes import GetDataTradingView, DataWorks, Strategy
 from fed_rates_scraper import fetch_and_write_fed_rates_scraper
 from config import config
 # EDGAR client for SEC filings metadata
@@ -18,7 +18,7 @@ import edgar_client
 # Creating objects of our classes 
 tv = GetDataTradingView()
 dw = DataWorks()
-
+s = Strategy()
 
 async def make_a_record_from_tv(symbol, exchange, interval, n_bars, file_path):
     df = tv.get_hist(           
@@ -161,6 +161,41 @@ async def fetch_and_write_filings(executor=None):
     return
 
 
+async def get_signal(file_path):
+    dw.write_log_line(text = f"Trying to check the last data for signal")
+    try: 
+        # Reading last 500 recorded rows of 2 files 
+        df_TONUSDT = pd.read_csv(config.TONUSDT_FILE).tail(500)\
+            .sort_values('timestamp_utc')\
+            .drop_duplicates('timestamp_utc')
+
+        df_BTCUSDT = pd.read_csv(config.BTCUSDT_FILE).tail(500)\
+            .sort_values('timestamp_utc')\
+            .drop_duplicates('timestamp_utc')
+        
+        # Data merge
+        df_BTC_TON = df_BTCUSDT.merge(df_TONUSDT, on=['timestamp_utc'], suffixes=['_btc', '_ton'])
+        
+        # Applying our strategy to check the signal on 2 instuments: 
+        df_BTC_TON = s.apply_values_for_double_strat(df_BTC_TON, 'close_price_btc', 'btc')
+        df_BTC_TON = s.apply_values_for_double_strat(df_BTC_TON, 'close_price_ton', 'ton')
+
+        # If the last row has signal then record it to the file 
+        last_row = df_BTC_TON.tail(1)
+        signal_condition = ((last_row['buy_signal_btc'] > 0) | (last_row['buy_signal_ton'] > 0) |
+                            (last_row['sell_signal_btc'] > 0) | (last_row['sell_signal_ton'] > 0)).any()
+        
+        if signal_condition:
+            last_row.to_csv(file_path, mode='a', header=not os.path.exists(file_path), index=False)
+            print('Signal row written to signals.csv')
+        else:
+            print('No signal in the last row')
+    except Exception as e:
+        dw.write_log_line(text = f"Unsuccessfull signal check with Exception: \n {e}")
+
+    return 
+
+
 async def main(interval: float = 300.0):
     # This 'now' is only for internal loop to iteratively write prices, so this is the only place we do not convert it to GMT
     now = datetime.datetime.now()                   
@@ -191,23 +226,29 @@ async def main(interval: float = 300.0):
 
     while True:
         # Executing the tasks (coroutines in terms of asyncio) in parallel using asyncio.gather(task1, task2... taskN)
-        await asyncio.gather(make_a_record_from_tv(symbol = "BTCUSDT",                                  # Coroutine 1: Write price of BTCUSDT 
+        await asyncio.gather(# Coroutine 1: Write price of BTCUSDT 
+                            make_a_record_from_tv(symbol = "BTCUSDT",                                  
                                                    exchange = "BINANCE", interval = "5", n_bars = 1, 
-                                                   file_path = config.BTCUSDT_FILE), 
-                             make_a_record_from_tv(symbol = "TONUSDT",                                  # Coroutine 2: Write price of TONUSDT
+                                                   file_path = config.BTCUSDT_FILE),                        
+                            # Coroutine 2: Write price of TONUSDT
+                            make_a_record_from_tv(symbol = "TONUSDT",                                  
                                                    exchange = "BINANCE", interval = "5", n_bars = 1, 
                                                    file_path = config.TONUSDT_FILE),
-                             make_a_record_from_tv(symbol = "MAG7",                                     # Coroutine 3: Write price of MAG7
+                            # Coroutine 3: Write price of MAG7
+                            make_a_record_from_tv(symbol = "MAG7",                                    
                                                    exchange = "LSE", interval = "5", n_bars = 1, 
                                                    file_path = config.MAG7_FILE),
-                             fetch_and_write_fed_rates_scraper(file_path=config.FED_RATES_FILE),        # Coroutine 4: Fetch Fed rates from Yahoo Finance
-                             fetch_and_write_news(news_limit=config.NEWS_FETCH_LIMIT, file_path=config.NEWS_FILE), # Coroutine 5: Fetching news 
-                             fetch_and_write_filings()                                                  # Coroutine 6: Fetch SEC filings metadata
+                            # Coroutine 4: Fetch Fed rates from Yahoo Finance              
+                            fetch_and_write_fed_rates_scraper(file_path=config.FED_RATES_FILE),    
+                            # Coroutine 5: Fetching news                             
+                            fetch_and_write_news(news_limit=config.NEWS_FETCH_LIMIT, file_path=config.NEWS_FILE), 
+                            # Coroutine 6: Fetch SEC filings metadata                                                 
+                            fetch_and_write_filings() 
                             )
 
-        # We can also execute any function AFTER asyncio.gather() finished like that: 
-        # await fetch_and_write_news(news_limit, file_path = 'data/news.csv')       
-       
+        # When all the data gathered we can use it for some merge and predictions: 
+        await get_signal(file_path=config.SIGNALS_FILE)
+
         dw.write_log_line(text = f"{"="*50} \nGathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... \n{"="*50} ")
 
         next_run += interval

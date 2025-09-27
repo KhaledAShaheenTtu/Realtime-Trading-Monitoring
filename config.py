@@ -34,7 +34,8 @@ class Config:
     FED_RATES_FILE = os.getenv('FED_RATES_FILE', 'data/fed_rates.csv')
     NEWS_FILE = os.getenv('NEWS_FILE', 'data/news.csv')
     FILINGS_FILE = os.getenv('FILINGS_FILE', 'data/sec_filings_combined.csv')
-    
+    SIGNALS_FILE = os.getenv('SIGNALS_FILE', 'data/signals.csv')
+
     # API Rate Limiting
     FRED_RATE_LIMIT = int(os.getenv('FRED_RATE_LIMIT', '120'))
     YAHOO_FINANCE_RATE_LIMIT = int(os.getenv('YAHOO_FINANCE_RATE_LIMIT', '2000'))
