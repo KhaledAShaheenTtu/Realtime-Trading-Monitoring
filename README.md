@@ -1,10 +1,36 @@
 # Realtime-Trading-Monitoring
 
-Our plan is to collect 4 datasets, then merge them together to extract some value.
+Our plan is to collect 4 datasets, then merge them together to extract some additional value.
 
-## Part 1. Price for several instruments from the exchange
+## Our datasets and domains
 
-It’s better to use crypto, since it trades 24/7 and doesn’t depend on a market calendar. We chose Binance because it provides price data without authentication (no API key required).
+### Domain 1. Trading prices of instruments 
+
+Common source: TradingView API requests. 
+
+* Dataset 1. BTCUSDT
+* Dataset 2. TONUSDT
+* Dataset 3. MAG7 
+
+### Domain 2. SEC filings 
+
+* Dataset 4. SEC filings
+
+### Domain 3. FED rates 
+
+* Dataset 5. Fer rates
+
+### Domain 4. News
+
+* Dataset 6. Related news. 
+
+
+
+#### Some general notes
+
+* It’s better to use crypto for demonstration purposes, since it trades 24/7 and doesn’t depend on a market calendar. We chose TradingView as our quotes source for the project because it provides reasonable amoung of price data without any authentication (no API key required).
+
+* Our approach is try to get data without authentications all where it's possible, cause the code supposed to run on a several of our computers and should also run on a professors machine.
 
 ## 🚀 Quick Start with Anaconda (Recommended)
 
@@ -25,7 +51,12 @@ conda env create -f environment.yml
 # Activate the environment
 conda activate trading-monitor
 
-# Run the application
+# In case it's your first start (optional): 
+# (1) execute this command (once) to retrieve 500 rows and put them down to the main file: 
+python write_history_data.py
+# It will request 500 last candles, latest news and SEC filings and put them into the data/ folder
+
+# Run the main application
 python write_current_price.py
 ```
 
@@ -43,11 +74,10 @@ How to merge:
 Currently, it logs two instruments: TONUSDT and BTCUSDT. Since they share the same timestamps, you can merge them on the timestamp field—either later during analysis or directly at write time.
 
 
-### TODO: 
+## Part 1. Trading prices of instruments 
 
-1) With current approach there will be small data drift cause our tasks takes several seconds, so in total it's not exact 300, its about 303-307 seconds for every 5 minutes. That would be great to make a single Loop to count the time above asyncio.gather() execution
+To be done 
 
-2) To replace 'create_connection from websocket' with local functions to fit project guidelines
 
 ## Part 2. News 
 
@@ -94,3 +124,8 @@ python-dotenv>=1.0.0
 jupyter, matplotlib, seaborn, plotly
 ```
 
+
+
+### TODO: 
+
+1) To replace 'create_connection from websocket' with local functions to fit project guidelines
