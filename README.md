@@ -32,6 +32,8 @@ Common source: TradingView API requests.
 
 * Our approach is try to get data without authentications all where it's possible, cause the code supposed to run on a several of our computers and should also run on a professors machine.
 
+* Our group are spread across timezones, so we will stick to GMT timestamps wherever possible to avoid any inconsistency
+
 ## 🚀 Quick Start with Anaconda (Recommended)
 
 ### Option 1: Automated Setup
@@ -128,4 +130,4 @@ jupyter, matplotlib, seaborn, plotly
 
 ### TODO: 
 
-1) To replace 'create_connection from websocket' with local functions to fit project guidelines
+1) Merge of all data sources to the current signal generation logic

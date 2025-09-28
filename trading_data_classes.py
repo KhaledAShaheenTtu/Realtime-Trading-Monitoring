@@ -5,12 +5,209 @@ import random
 import re
 import string
 import os
-# Could be out of stardard Conda package
-import requests                             # conda install requests
-import pandas as pd                         # conda install pandas
-from websocket import create_connection     # conda install websocket-client
+import socket
+import ssl
+import base64
+import hashlib
+import struct
+import urllib.parse
+import requests                             
+import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+
+class SimpleWebSocket:
+    """
+    A simple WebSocket client implementation using only standard library components
+    (socket, ssl, base64, hashlib) to replace websocket-client dependency.
+    """
+    
+    def __init__(self, url, headers=None, timeout=5):
+        self.url = url
+        self.headers = headers or {}
+        self.timeout = timeout
+        self.sock = None
+        self.connected = False
+        
+        # Parse URL
+        parsed = urllib.parse.urlparse(url)
+        self.host = parsed.hostname
+        self.port = parsed.port or (443 if parsed.scheme == 'wss' else 80)
+        self.path = parsed.path or '/'
+        self.is_secure = parsed.scheme == 'wss'
+        
+    def connect(self):
+        """Establish WebSocket connection with handshake"""
+        # Create socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(self.timeout)
+        
+        # Wrap with SSL if needed
+        if self.is_secure:
+            context = ssl.create_default_context()
+            self.sock = context.wrap_socket(self.sock, server_hostname=self.host)
+        
+        # Connect
+        self.sock.connect((self.host, self.port))
+        
+        # WebSocket handshake
+        key = base64.b64encode(os.urandom(16)).decode('utf-8')
+        
+        handshake = (
+            f"GET {self.path} HTTP/1.1\r\n"
+            f"Host: {self.host}:{self.port}\r\n"
+            f"Upgrade: websocket\r\n"
+            f"Connection: Upgrade\r\n"
+            f"Sec-WebSocket-Key: {key}\r\n"
+            f"Sec-WebSocket-Version: 13\r\n"
+        )
+        
+        # Add custom headers
+        for header_key, header_value in self.headers.items():
+            if isinstance(header_value, dict):
+                header_value = json.dumps(header_value)
+            handshake += f"{header_key}: {header_value}\r\n"
+        
+        handshake += "\r\n"
+        
+        self.sock.send(handshake.encode('utf-8'))
+        
+        # Read response
+        response = b""
+        while b"\r\n\r\n" not in response:
+            response += self.sock.recv(1)
+        
+        # Verify handshake response
+        if b"101 Switching Protocols" not in response:
+            raise Exception("WebSocket handshake failed")
+            
+        self.connected = True
+    
+    def _create_frame(self, data, opcode=1):
+        """Create WebSocket frame"""
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        
+        frame = bytearray()
+        
+        # First byte: FIN (1) + RSV (000) + Opcode (0001 for text)
+        frame.append(0x80 | opcode)
+        
+        # Payload length and masking
+        payload_len = len(data)
+        if payload_len < 126:
+            frame.append(0x80 | payload_len)  # Masked bit + payload length
+        elif payload_len < 65536:
+            frame.append(0x80 | 126)  # Masked bit + 126
+            frame.extend(struct.pack('>H', payload_len))
+        else:
+            frame.append(0x80 | 127)  # Masked bit + 127  
+            frame.extend(struct.pack('>Q', payload_len))
+        
+        # Masking key (4 bytes)
+        mask_key = os.urandom(4)
+        frame.extend(mask_key)
+        
+        # Masked payload
+        masked_data = bytearray()
+        for i, byte in enumerate(data):
+            masked_data.append(byte ^ mask_key[i % 4])
+        frame.extend(masked_data)
+        
+        return bytes(frame)
+    
+    def send(self, data):
+        """Send data through WebSocket"""
+        if not self.connected:
+            raise Exception("WebSocket not connected")
+        
+        frame = self._create_frame(data)
+        self.sock.send(frame)
+    
+    def recv(self):
+        """Receive data from WebSocket"""
+        if not self.connected:
+            raise Exception("WebSocket not connected")
+        
+        # Read first 2 bytes
+        header = self.sock.recv(2)
+        if len(header) < 2:
+            raise Exception("Connection closed")
+        
+        # Parse header
+        fin = (header[0] & 0x80) == 0x80
+        opcode = header[0] & 0x0F
+        masked = (header[1] & 0x80) == 0x80
+        payload_len = header[1] & 0x7F
+        
+        # Handle extended payload length
+        if payload_len == 126:
+            payload_len = struct.unpack('>H', self.sock.recv(2))[0]
+        elif payload_len == 127:
+            payload_len = struct.unpack('>Q', self.sock.recv(8))[0]
+        
+        # Read mask key if present (server messages shouldn't be masked)
+        mask_key = None
+        if masked:
+            mask_key = self.sock.recv(4)
+        
+        # Read payload
+        payload = b""
+        while len(payload) < payload_len:
+            chunk = self.sock.recv(payload_len - len(payload))
+            if not chunk:
+                raise Exception("Connection closed")
+            payload += chunk
+        
+        # Unmask payload if needed
+        if masked and mask_key:
+            unmasked = bytearray()
+            for i, byte in enumerate(payload):
+                unmasked.append(byte ^ mask_key[i % 4])
+            payload = bytes(unmasked)
+        
+        # Handle close frame
+        if opcode == 8:
+            self.close()
+            raise Exception("Connection closed by server")
+        
+        return payload.decode('utf-8')
+    
+    def close(self):
+        """Close WebSocket connection"""
+        if self.sock:
+            try:
+                # Send close frame
+                close_frame = self._create_frame(b"", opcode=8)
+                self.sock.send(close_frame)
+            except:
+                pass
+            finally:
+                self.sock.close()
+                self.sock = None
+                self.connected = False
+
+
+def create_connection(url, headers=None, timeout=5):
+    """
+    Create and connect a WebSocket connection
+    (Drop-in replacement for websocket.create_connection)
+    """
+    # Parse headers if they're provided as JSON string
+    parsed_headers = {}
+    if headers:
+        if isinstance(headers, str):
+            try:
+                parsed_headers = json.loads(headers)
+            except json.JSONDecodeError:
+                parsed_headers = {"User-Agent": headers}
+        else:
+            parsed_headers = headers
+    
+    ws = SimpleWebSocket(url, parsed_headers, timeout)
+    ws.connect()
+    return ws
 
 
 class GetDataTradingView:
@@ -308,7 +505,8 @@ class GetDataTradingView:
         return self.__create_df(raw_data, symbol)
 
 ##############################################################################
-# Source of the code above:  https://pypi.org/project/tradingview-datafeed/  # 
+# Source of the code above:  https://pypi.org/project/tradingview-datafeed/  #
+#      Its under MIT license, so copy and editing are allowed                # 
 ##############################################################################
 
 
@@ -344,6 +542,12 @@ class DataWorks:
 
 
 class Strategy:
+    """
+    Source code of the trading strategy (for Pine editor) are available pubclicly and declared as open-source
+    https://www.tradingview.com/script/uCV8I4xA-Bollinger-RSI-Double-Strategy-by-ChartArt-v1-1/
+    
+    Has been rewritten for python by us.
+    """
 
     def calculate_rsi(self, prices, period):
         delta = prices.diff()

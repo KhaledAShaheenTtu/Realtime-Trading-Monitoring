@@ -57,7 +57,7 @@ class FedRatesScaper:
         """
         Try multiple sources and return all successful fetches
         """
-        print("Fetching Fed rates from multiple sources...")
+        # print("Fetching Fed rates from multiple sources...")
         
         sources = [
             ('Yahoo Finance', self.get_fed_funds_rate_yahoo)
@@ -88,7 +88,7 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
     scraper = FedRatesScaper()
     dw = DataWorks()
     
-    print("\nFetching Fed rates from public sources (no API key needed)...")
+    print("Fetching Fed rates from public sources (no API key needed)...")
     
     # Get rates from all available sources
     rates_data = scraper.get_all_available_rates()
