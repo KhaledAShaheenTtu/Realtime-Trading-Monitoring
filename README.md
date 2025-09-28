@@ -6,33 +6,40 @@ Our plan is to collect 4 datasets, then merge them together to extract some addi
 
 ### Domain 1. Trading prices of instruments 
 
-Common source: TradingView API requests. 
-
 * Dataset 1. BTCUSDT
 * Dataset 2. TONUSDT
 * Dataset 3. MAG7 
+
+Common source: TradingView API requests. 
+All the datasets consist of prices aggregated in 5-minutes 'candles' (1 candle consist of 4 prices: high, low, open, close traded during the candle interval). 
+
 
 ### Domain 2. SEC filings 
 
 * Dataset 4. SEC filings
 
+We're doing text search across SEC filings published in EDGAR database (endpoint efts.sec.gov/LATEST/search-index) looking for realted SEC filings of our instruments and indexes (BTC, TON, MAG7). See edgar_client.py for details. 
+
 ### Domain 3. FED rates 
 
 * Dataset 5. Fer rates
 
+We're requesting Yahoo finance API to get the latest price of ^IRX (13-week Treasury Bill). See fed_rates_screper.py for details.  
+s
 ### Domain 4. News
 
 * Dataset 6. Related news. 
 
+We're requesting coindesk API endpoint to get the 1 latest related news for one of 3 categories (BTC, TON, MAG7). See finction fetch_and_write_news() in the file 'write_current_prices.py' to get the results. 
 
 
-#### Some general notes
+## Some general notes
 
-* It’s better to use crypto for demonstration purposes, since it trades 24/7 and doesn’t depend on a market calendar. We chose TradingView as our quotes source for the project because it provides reasonable amoung of price data without any authentication (no API key required).
+* It’s better to use crypto for demonstration purposes since it trades 24/7 and isn’t tied to a market calendar. We chose TradingView as our data source for the project because it provides a reasonable amount of price data without requiring authentication (no API key needed).
 
-* Our approach is try to get data without authentications all where it's possible, cause the code supposed to run on a several of our computers and should also run on a professors machine.
+* Our approach is to get data without authentication wherever possible, since the code is supposed to run on several of our computers as well as on the professor’s machine.
 
-* Our group are spread across timezones, so we will stick to GMT timestamps wherever possible to avoid any inconsistency
+* Our group is spread across multiple time zones, so we will stick to GMT timestamps wherever possible to avoid any inconsistencies.
 
 ## 🚀 Quick Start with Anaconda (Recommended)
 
@@ -62,33 +69,19 @@ python write_history_data.py
 python write_current_price.py
 ```
 
-Script is designed to run continuously to collect data every 5 minutes. See TODO section for improvements.
+Script is designed to run continuously to collect data every 5 minutes.
 
-What does it do? 
+
+#### What does it do? 
 
 * Waits for the next 5-minute boundary (XX:00, XX:05, XX:10, etc.).
-* Then waits an additional 15 seconds to allow the exchange to finalize the 5-minute close.
-* Requests the price from the exchange, receives it, and stores it in a local CSV file.
+* Then waits an additional 15 seconds to allow the quotes provider to finalize the 5-minute close.
+* Requests the price from the quotes provider, receives it, and stores it in a local CSV file.
 * In parallel it requests the latest news articles about 2 instruments and store it locally in data/news.csv
+* In parallel, it also requests the latest SEC filings related to our trading instruments.
+* After all the relevant data is gathered, it applies a small trading strategy to generate signals from the newly collected data.
+* Repeats the process every 5 minutes.
 
-How to merge:
-
-Currently, it logs two instruments: TONUSDT and BTCUSDT. Since they share the same timestamps, you can merge them on the timestamp field—either later during analysis or directly at write time.
-
-
-## Part 1. Trading prices of instruments 
-
-To be done 
-
-
-## Part 2. News 
-
-To be done 
-
-
-## Part 3. Regulatory documents and releases
-
-To be done 
 
 
 ## 📦 Environment & Dependencies
@@ -115,9 +108,9 @@ numpy>=1.24.0
 
 # Web APIs & Scraping
 requests>=2.31.0
-beautifulsoup4>=4.12.0
-lxml>=4.9.0
-websocket-client>=1.6.0
+# beautifulsoup4>=4.12.0 # (excluded - it's not Conda Base)
+# lxml>=4.9.0
+# websocket-client>=1.6.0
 
 # Configuration
 python-dotenv>=1.0.0
@@ -126,6 +119,17 @@ python-dotenv>=1.0.0
 jupyter, matplotlib, seaborn, plotly
 ```
 
+
+## How do we merge data:
+
+Currently, it logs two instruments: TONUSDT and BTCUSDT. Since they share the same timestamps, you can merge them on the timestamp field — either later during analysis or directly at write time.
+
+
+## How do we get additional value from the datasets
+
+1) From a trading perspective, some instruments are interconnected in the market, so changes in one instrument can serve as a predictor for changes in another.
+2) By continuously retrieving even small portions of data, we accumulate a valuable historical dataset that can be used for backtesting and training more complex algorithms, such as machine learning models.
+3) By merging events of different types — like prices, news, and SEC filings — we can extract additional insights and make our trading signals clearer and more informative.
 
 
 ### TODO: 

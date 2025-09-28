@@ -46,7 +46,7 @@ if [ $? -eq 0 ]; then
     
     echo ""
     echo "📦 Installed packages:"
-    conda list | grep -E "(pandas|numpy|requests|beautifulsoup4|python-dotenv|websocket-client)" || echo "Key packages are installed"
+    conda list | grep -E "(pandas|numpy|requests)" || echo "Key packages are installed"
     
     echo ""
     echo "🎉 Setup complete! You can now:"

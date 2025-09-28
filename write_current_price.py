@@ -162,6 +162,18 @@ async def fetch_and_write_filings(executor=None):
 
 
 async def get_signal(file_path):
+    """
+    After gathering all the data we can try to generate signal (indicator to buy or sell)
+    
+    How we're getting signal: 
+    
+    (1) We're reading last 500 rows of just updated CSV files with BTC and TON latest prices
+    (2) Merging them on the timestamp_utc 
+    (3) Applying our trading strategy (s.apply_values_for_double_strat()) for both instruments 
+    (4) Check the last row if it has any signal (value = 1) in any of traget variables ('buy_signal_btc' etc.)
+    (5) If the last (current) price returns signal, we're recording that into signals.csv file
+
+    """
     dw.write_log_line(text = f"Trying to check the last data for signal")
     try: 
         # Reading last 500 recorded rows of 2 files 
