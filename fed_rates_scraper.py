@@ -27,8 +27,8 @@ class FedRatesScaper:
             # Yahoo Finance API endpoint for Treasury data
             url = "https://query1.finance.yahoo.com/v8/finance/chart/^IRX"
             params = {
-                'interval': '1d',
-                'range': '5d'
+                'interval': '5m', # previous: '1d'
+                'range': '1h'     # previous: '5d'
             }
             
             response = self.session.get(url, params=params, timeout=10)
