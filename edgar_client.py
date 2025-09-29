@@ -179,7 +179,7 @@ def write_filings_to_csv(filings: List[Dict], output_path: str):
     headers = list({k for f in filings for k in f.keys()})
     # Ensure deterministic header order
     ordered = [p for p in default_headers if p in headers] + sorted([h for h in headers if h not in default_headers])
-    with open(output_path, 'w', newline='', encoding='utf-8') as f:
+    with open(output_path, 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(ordered)
         for fil in filings:
