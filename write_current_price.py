@@ -1,7 +1,6 @@
 import requests
 import pandas as pd
 import logging
-import time
 import datetime
 import os
 import csv

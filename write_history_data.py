@@ -23,7 +23,6 @@ import time
 import datetime
 import os
 import csv
-import asyncio
 import edgar_client
 
 # Our own classes to gather some data 
