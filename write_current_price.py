@@ -174,28 +174,205 @@ async def get_signal(file_path):
 
     """
     dw.write_log_line(text = f"Trying to check the last data for signal")
-    try: 
-        # Reading last 500 recorded rows of 2 files 
-        df_TONUSDT = pd.read_csv(config.TONUSDT_FILE).tail(500)\
-            .sort_values('timestamp_utc')\
-            .drop_duplicates('timestamp_utc')
 
-        df_BTCUSDT = pd.read_csv(config.BTCUSDT_FILE).tail(500)\
-            .sort_values('timestamp_utc')\
-            .drop_duplicates('timestamp_utc')
-        
-        # Data merge
-        df_BTC_TON = df_BTCUSDT.merge(df_TONUSDT, on=['timestamp_utc'], suffixes=['_btc', '_ton'])
-        
-        # Applying our strategy to check the signal on 2 instuments: 
-        df_BTC_TON = s.apply_values_for_double_strat(df_BTC_TON, 'close_price_btc', 'btc')
-        df_BTC_TON = s.apply_values_for_double_strat(df_BTC_TON, 'close_price_ton', 'ton')
+    def _load_price_frame(path: str, suffix: str) -> pd.DataFrame:
+        resolved = _resolve_path(path)
+        if not os.path.exists(resolved):
+            return pd.DataFrame()
+        df = pd.read_csv(resolved).tail(500)
+        if df.empty:
+            return df
+        df['timestamp_utc'] = pd.to_datetime(df['timestamp_utc'], utc=True, errors='coerce')
+        df = df.sort_values('timestamp_utc').drop_duplicates('timestamp_utc')
+        rename_map = {col: f"{col}_{suffix}" for col in df.columns if col != 'timestamp_utc'}
+        return df.rename(columns=rename_map)
 
-        # If the last row has signal then record it to the file 
-        last_row = df_BTC_TON.tail(1)
-        signal_condition = ((last_row['buy_signal_btc'] > 0) | (last_row['buy_signal_ton'] > 0) |
-                            (last_row['sell_signal_btc'] > 0) | (last_row['sell_signal_ton'] > 0)).any()
-        
+    def _load_fed_rates() -> pd.DataFrame:
+        resolved = _resolve_path(config.FED_RATES_FILE)
+        if not os.path.exists(resolved):
+            return pd.DataFrame()
+        df = pd.read_csv(resolved)
+        if df.empty:
+            return df
+        df['fetch_timestamp_utc'] = pd.to_datetime(df['fetch_timestamp_utc'], utc=True, errors='coerce')
+        df = df.sort_values('fetch_timestamp_utc').drop_duplicates('fetch_timestamp_utc', keep='last')
+        return df[['fetch_timestamp_utc', 'rate_value', 'description']]
+
+    def _load_news() -> pd.DataFrame:
+        resolved = _resolve_path(config.NEWS_FILE)
+        if not os.path.exists(resolved):
+            return pd.DataFrame()
+        df = pd.read_csv(resolved)
+        if df.empty:
+            return df
+        df['utc_timestamp'] = pd.to_datetime(df['utc_timestamp'], utc=True, errors='coerce')
+        df = df.sort_values('utc_timestamp').drop_duplicates(['instrument', 'utc_timestamp'], keep='last')
+        return df
+
+    def _load_filings() -> pd.DataFrame:
+        resolved = _resolve_path(config.FILINGS_FILE)
+        if not os.path.exists(resolved):
+            return pd.DataFrame()
+        df = pd.read_csv(resolved)
+        if df.empty:
+            return df
+        df['filedDate'] = pd.to_datetime(df['filedDate'], utc=True, errors='coerce')
+        df = df.dropna(subset=['filedDate'])
+        df = df.sort_values('filedDate').drop_duplicates(['instrument', 'accessionNumber'], keep='last')
+        return df
+
+    def _attach_latest_event(base_df: pd.DataFrame, events_df: pd.DataFrame, instrument: str,
+                              time_col: str, prefix: str, rename_cols: dict, direction: str = 'backward') -> pd.DataFrame:
+        if base_df.empty:
+            return base_df
+        time_column_name = f"{prefix}_time"
+        value_columns = list(rename_cols.values())
+        hours_column = f"{prefix}_hours_since"
+        if events_df.empty or 'instrument' not in events_df.columns or instrument not in events_df['instrument'].unique():
+            base_df[time_column_name] = pd.NaT
+            for col in value_columns:
+                base_df[col] = pd.NA
+            base_df[hours_column] = pd.NA
+            return base_df
+        subset = events_df[events_df['instrument'] == instrument].copy()
+        if subset.empty:
+            base_df[time_column_name] = pd.NaT
+            for col in value_columns:
+                base_df[col] = pd.NA
+            base_df[hours_column] = pd.NA
+            return base_df
+        subset = subset.sort_values(time_col)
+        keep_cols = [time_col] + list(rename_cols.keys())
+        subset = subset[keep_cols]
+        merged = pd.merge_asof(
+            base_df.sort_values('timestamp_utc'),
+            subset,
+            left_on='timestamp_utc',
+            right_on=time_col,
+            direction=direction,
+        )
+        merged = merged.rename(columns={time_col: time_column_name, **rename_cols})
+        if time_column_name in merged.columns:
+            merged[hours_column] = (
+                (merged['timestamp_utc'] - merged[time_column_name]).dt.total_seconds() / 3600.0
+            )
+        else:
+            merged[hours_column] = pd.NA
+        return merged
+
+    try:
+        df_btc = _load_price_frame(config.BTCUSDT_FILE, 'btc')
+        df_ton = _load_price_frame(config.TONUSDT_FILE, 'ton')
+        df_mag7 = _load_price_frame(config.MAG7_FILE, 'mag7')
+
+        if df_btc.empty or df_ton.empty:
+            raise ValueError('Insufficient price data to compute signals.')
+
+        df_merged = df_btc.merge(df_ton, on='timestamp_utc', how='inner')
+        if not df_mag7.empty:
+            df_merged = df_merged.merge(df_mag7, on='timestamp_utc', how='left')
+
+        df_merged = df_merged.sort_values('timestamp_utc')
+
+        # Attach Fed rate information (latest known rate prior to timestamp)
+        fed_rates = _load_fed_rates()
+        if not fed_rates.empty:
+            df_merged = pd.merge_asof(
+                df_merged,
+                fed_rates,
+                left_on='timestamp_utc',
+                right_on='fetch_timestamp_utc',
+                direction='backward'
+            )
+            df_merged = df_merged.rename(columns={
+                'fetch_timestamp_utc': 'fed_rate_timestamp',
+                'rate_value': 'fed_rate_value',
+                'description': 'fed_rate_description'
+            })
+            df_merged['fed_rate_value'] = df_merged['fed_rate_value'].ffill()
+        else:
+            df_merged['fed_rate_timestamp'] = pd.NaT
+            df_merged['fed_rate_value'] = pd.NA
+            df_merged['fed_rate_description'] = pd.NA
+
+        # Attach latest news per instrument
+        news_df = _load_news()
+        df_merged = _attach_latest_event(
+            df_merged,
+            news_df,
+            'BTC',
+            'utc_timestamp',
+            'btc_news',
+            {'source': 'btc_news_source', 'raw_text': 'btc_news_raw_text'}
+        )
+        df_merged = _attach_latest_event(
+            df_merged,
+            news_df,
+            'TON',
+            'utc_timestamp',
+            'ton_news',
+            {'source': 'ton_news_source', 'raw_text': 'ton_news_raw_text'}
+        )
+        df_merged = _attach_latest_event(
+            df_merged,
+            news_df,
+            'MAG7',
+            'utc_timestamp',
+            'mag7_news',
+            {'source': 'mag7_news_source', 'raw_text': 'mag7_news_raw_text'}
+        )
+
+        # Attach latest SEC filing per instrument
+        filings_df = _load_filings()
+        df_merged = _attach_latest_event(
+            df_merged,
+            filings_df,
+            'BTC',
+            'filedDate',
+            'btc_filing',
+            {
+                'companyName': 'btc_filing_company',
+                'form': 'btc_filing_form',
+                'detail_url': 'btc_filing_detail_url'
+            }
+        )
+        df_merged = _attach_latest_event(
+            df_merged,
+            filings_df,
+            'TON',
+            'filedDate',
+            'ton_filing',
+            {
+                'companyName': 'ton_filing_company',
+                'form': 'ton_filing_form',
+                'detail_url': 'ton_filing_detail_url'
+            }
+        )
+        df_merged = _attach_latest_event(
+            df_merged,
+            filings_df,
+            'MAG7',
+            'filedDate',
+            'mag7_filing',
+            {
+                'companyName': 'mag7_filing_company',
+                'form': 'mag7_filing_form',
+                'detail_url': 'mag7_filing_detail_url'
+            }
+        )
+
+        # Apply trading strategy on enriched frame
+        df_merged = s.apply_values_for_double_strat(df_merged, 'close_price_btc', 'btc')
+        df_merged = s.apply_values_for_double_strat(df_merged, 'close_price_ton', 'ton')
+
+        last_row = df_merged.tail(1)
+        signal_condition = (
+            (last_row['buy_signal_btc'] > 0) |
+            (last_row['buy_signal_ton'] > 0) |
+            (last_row['sell_signal_btc'] > 0) |
+            (last_row['sell_signal_ton'] > 0)
+        ).any()
+
         if signal_condition:
             last_row.to_csv(file_path, mode='a', header=not os.path.exists(file_path), index=False)
             print('Signal row written to signals.csv')
