@@ -437,7 +437,7 @@ async def main(interval: float = 300.0):
         # When all the data gathered we can use it for some merge and predictions: 
         await get_signal(file_path=config.SIGNALS_FILE)
 
-        dw.write_log_line(text = f"{"="*50} \nGathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... \n{"="*50} ")
+        dw.write_log_line(text = f"{'='*50} \nGathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... \n{'='*50} ")
 
         next_run += interval
         now = loop.time()

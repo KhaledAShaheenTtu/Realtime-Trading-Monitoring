@@ -73,12 +73,14 @@ class Config:
         missing_keys = []
         warnings = []
         
+        # Commented out because this variables were not in the config, but 'if not X' requires them to be there    
         # Check for optional API keys (warnings only)
-        if not cls.FRED_API_KEY:
-            warnings.append("FRED_API_KEY not set - using demo/fallback sources")
+
+        # if not cls.FRED_API_KEY:
+        #    warnings.append("FRED_API_KEY not set - using demo/fallback sources")
         
-        if not cls.ALPHA_VANTAGE_API_KEY:
-            warnings.append("ALPHA_VANTAGE_API_KEY not set - limited access")
+        #if not cls.ALPHA_VANTAGE_API_KEY:
+        #    warnings.append("ALPHA_VANTAGE_API_KEY not set - limited access")
         
         # Check data directory exists
         if not os.path.exists(cls.DATA_DIR):

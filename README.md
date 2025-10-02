@@ -47,9 +47,12 @@ We're requesting coindesk API endpoint to get the 1 latest related news for one 
 ```bash
 # Set up the conda environment (first time only)
 ./setup_environment.sh
+# or 'bash ./setup_environment.sh' in case of execution on Windows
+# in that case 'bash' has to be added into Path
 
 # Run the application
 ./run_app.sh
+# or 'bash ./run_app.sh' in case of execution on Windows
 ```
 
 ### Option 2: Manual Setup
