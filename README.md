@@ -22,7 +22,7 @@ We're doing text search across SEC filings published in EDGAR database (endpoint
 
 ### Domain 3. FED rates 
 
-* Dataset 5. Fer rates
+* Dataset 5. Fed rates
 
 We're requesting Yahoo finance API to get the latest price of ^IRX (13-week Treasury Bill). See fed_rates_screper.py for details.  
 s
@@ -41,7 +41,7 @@ We're requesting coindesk API endpoint to get the 1 latest related news for one 
 
 * Our group is spread across multiple time zones, so we will stick to GMT timestamps wherever possible to avoid any inconsistencies.
 
-## 🚀 Quick Start with Anaconda (Recommended)
+##  Quick Start with Anaconda (Recommended)
 
 ### Option 1: Automated Setup
 ```bash
@@ -87,16 +87,16 @@ Script is designed to run continuously to collect data every 5 minutes.
 
 
 
-## 📦 Environment & Dependencies
+##  Environment & Dependencies
 
 ### Anaconda Environment (Recommended)
 This project uses Anaconda for dependency management and isolated environments.
 
 **Key Benefits:**
-- 🔒 Isolated environment prevents conflicts
-- 📦 Optimized package versions from conda-forge
-- 🚀 Easy setup and reproducible environments
-- 🧪 Includes Jupyter for data analysis
+-  Isolated environment prevents conflicts
+-  Optimized package versions from conda-forge
+-  Easy setup and reproducible environments
+-  Includes Jupyter for data analysis
 
 **Environment Details:**
 - Python 3.11
