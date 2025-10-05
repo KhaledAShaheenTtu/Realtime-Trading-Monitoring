@@ -374,7 +374,11 @@ async def get_signal(file_path):
         ).any()
 
         if signal_condition:
-            last_row.to_csv(file_path, mode='a', header=not os.path.exists(file_path), index=False)
+            last_row[['instrument_btc','timestamp_utc','open_price_btc','high_price_btc',
+            'low_price_btc','close_price_btc','record_timestamp_utc_btc','instrument_ton',
+            'open_price_ton','high_price_ton','low_price_ton','close_price_ton',
+            'record_timestamp_utc_ton','RSI_dd_strat','BB_basis','BB_upper',
+            'BB_lower','buy_signal_btc','sell_signal_btc','buy_signal_ton','sell_signal_ton']].to_csv(file_path, mode='a', header=not os.path.exists(file_path), index=False)
             print('Signal row written to signals.csv')
         else:
             print('No signal in the last row')

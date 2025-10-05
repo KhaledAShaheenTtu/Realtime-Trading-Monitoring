@@ -1,6 +1,6 @@
 # Realtime-Trading-Monitoring
 
-Our plan is to collect 4 datasets, then merge them together to extract some additional value.
+Our plan is to collect 6 datasets, then merge them together to extract some additional value.
 
 ## Our datasets and domains
 
@@ -25,12 +25,14 @@ We're doing text search across SEC filings published in EDGAR database (endpoint
 * Dataset 5. Fed rates
 
 We're requesting Yahoo finance API to get the latest price of ^IRX (13-week Treasury Bill). See fed_rates_screper.py for details.  
-s
+
 ### Domain 4. News
 
 * Dataset 6. Related news. 
 
 We're requesting coindesk API endpoint to get the 1 latest related news for one of 3 categories (BTC, TON, MAG7). See finction fetch_and_write_news() in the file 'write_current_prices.py' to get the results. 
+
+NOTE: currently we do not use news in the get_signal() function, just store the news for future analysis or to show them in (hypothetical) traders interface. 
 
 
 ## Some general notes
@@ -47,12 +49,12 @@ We're requesting coindesk API endpoint to get the 1 latest related news for one 
 ```bash
 # Set up the conda environment (first time only)
 ./setup_environment.sh
-# or 'bash ./setup_environment.sh' in case of execution on Windows
-# in that case 'bash' has to be added into Path
+# in case of execution on Windows it would be: 'bash ./setup_environment.sh' 
+# Keep in mind in that case 'bash' has to be added into Path
 
 # Run the application
 ./run_app.sh
-# or 'bash ./run_app.sh' in case of execution on Windows
+# 'bash ./run_app.sh' in case of execution on Windows
 ```
 
 ### Option 2: Manual Setup
@@ -111,21 +113,20 @@ numpy>=1.24.0
 
 # Web APIs & Scraping
 requests>=2.31.0
-# beautifulsoup4>=4.12.0 # (excluded - it's not Conda Base)
-# lxml>=4.9.0
-# websocket-client>=1.6.0
 
 # Configuration
 python-dotenv>=1.0.0
 
-# Analysis Tools
-jupyter, matplotlib, seaborn, plotly
+# Async programming support
+aiohttp
+asyncio
+
 ```
 
 
 ## How do we merge data:
 
-Currently, it logs two instruments: TONUSDT and BTCUSDT. Since they share the same timestamps, you can merge them on the timestamp field — either later during analysis or directly at write time.
+Currently, it logs two instruments: TONUSDT and BTCUSDT. Since they share the same timestamps, you can merge them on the timestamp field — either later during analysis or directly at write time. This is the stable decision for outside_of_trading_hours demonstration purposes, because MAG7 has not trades 24/7 (API returns the last available price at the moment of market closing).
 
 
 ## How do we get additional value from the datasets
@@ -134,7 +135,16 @@ Currently, it logs two instruments: TONUSDT and BTCUSDT. Since they share the sa
 2) By continuously retrieving even small portions of data, we accumulate a valuable historical dataset that can be used for backtesting and training more complex algorithms, such as machine learning models.
 3) By merging events of different types — like prices, news, and SEC filings — we can extract additional insights and make our trading signals clearer and more informative.
 
+## Showcases 
 
-### TODO: 
+The /experiments folder contains *.ipynb-notebooks demonstrating some of the workflows:
 
-1) Merge of all data sources to the current signal generation logic
+* data_merge_experiment.ipynb — merging data and checking it for signals
+* get_history_data.ipynb — requesting 500+ rows of data to build the local history
+
+## Licenses
+
+We’re using only publicly available data (via APIs) and Python libraries available through pip (mostly MIT-licensed).
+Some parts of the code are partially copy-pasted or inspired by other MIT-licensed libraries available in public (i.e. on Github).
+
+All links to the source code are provided in the comments—search for 'license' to find these cases.

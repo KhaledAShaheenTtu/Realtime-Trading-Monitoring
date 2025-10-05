@@ -13,7 +13,7 @@ dependencies:
   # HTTP requests and web APIs
   - requests>=2.31.0
   
-  # Web scraping and HTML parsing
+  # Web scraping and HTML parsing (but eventually we do not use them here)
   # - beautifulsoup4>=4.12.0
   # - lxml>=4.9.0
   
@@ -24,13 +24,14 @@ dependencies:
   - jupyter
   - ipykernel
   
-  # Additional useful packages for data analysis
-  - matplotlib
-  - seaborn
-  - plotly
+  # Additional useful packages for data analysis (but eventually we do not use them here)
+  # - matplotlib
+  # - seaborn
+  # - plotly
   
   # Async programming support
   - aiohttp
+  - asyncio
   
   # Pip dependencies (packages not available in conda)
   - pip

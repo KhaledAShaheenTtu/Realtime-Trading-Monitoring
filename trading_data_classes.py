@@ -543,7 +543,9 @@ class DataWorks:
 
 class Strategy:
     """
-    Source code of the trading strategy (for Pine editor) are available pubclicly and declared as open-source
+    Source code of the trading strategy (for Pine editor) are available pubclicly and declared as open-source 
+        (licensed by TradingView end user agreement)
+
     https://www.tradingview.com/script/uCV8I4xA-Bollinger-RSI-Double-Strategy-by-ChartArt-v1-1/
     
     Has been rewritten for python by us.
