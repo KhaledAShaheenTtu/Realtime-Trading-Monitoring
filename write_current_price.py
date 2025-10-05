@@ -427,7 +427,7 @@ async def main(interval: float = 300.0):
                                                    exchange = "LSE", interval = "5", n_bars = 1, 
                                                    file_path = config.MAG7_FILE),
                             # Coroutine 4: Fetch Fed rates from Yahoo Finance              
-                            fetch_and_write_fed_rates_scraper(file_path=config.FED_RATES_FILE),    
+                            fetch_and_write_fed_rates_scraper(file_path=config.FED_RATES_FILE, range_value=config.FED_RATES_RANGE, interval=config.FED_RATES_INTERVAL),    
                             # Coroutine 5: Fetching news                             
                             fetch_and_write_news(news_limit=config.NEWS_FETCH_LIMIT, file_path=config.NEWS_FILE), 
                             # Coroutine 6: Fetch SEC filings metadata                                                 

@@ -456,3 +456,28 @@ Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for 
     - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
     - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
 2025-09-30 03:03:49 Trying to check the last data for signal
+2025-10-04 23:22:01 News for instruments retrieved
+2025-10-04 23:23:30 News for instruments retrieved
+2025-10-04 23:23:53 News for instruments retrieved
+2025-10-04 23:24:27 News for instruments retrieved
+2025-10-04 23:24:48 News for instruments retrieved
+2025-10-04 23:25:01 News for instruments retrieved
+2025-10-04 23:25:09 News for instruments retrieved
+2025-10-04 23:25:14 News for instruments retrieved
+2025-10-04 23:25:18 News for instruments retrieved
+2025-10-04 23:30:08 News for instruments retrieved
+2025-10-04 23:30:08 Fed rates scraped and written: 1 sources to the file: data/fed_rates.csv
+2025-10-04 23:31:33 Fed rates scraped and written: 1 sources to the file: data/fed_rates.csv
+2025-10-04 23:38:18 Fed rates scraped and written: 1 sources to the file: data/fed_rates.csv
+2025-10-04 23:58:03 Waiting 131.5 seconds till the next 5 minutes interval before requesting price from the TradingView
+2025-10-05 00:00:15 Candle of 'BINANCE:BTCUSDT' has written to the file data/btcusdt.csv with the time 2025-10-05 00:00:00+00:00
+2025-10-05 00:00:15 Candle of 'BINANCE:TONUSDT' has written to the file data/tonusdt.csv with the time 2025-10-05 00:00:00+00:00
+2025-10-05 00:00:16 Candle of 'LSE:MAG7' has written to the file data/mag7.csv with the time 2025-10-03 15:25:00+00:00
+2025-10-05 00:00:16 Fed rates scraped and written: 1 sources to the file: data/fed_rates.csv
+2025-10-05 00:00:17 News for instruments retrieved
+2025-10-05 00:00:26 EDGAR filings written to:  data/sec_filings_combined.csv
+2025-10-05 00:00:26 Trying to check the last data for signal
+2025-10-05 00:00:26 ================================================== 
+Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... 
+================================================== 
+2025-10-05 00:00:26 Wait time till the next start: 288.4

@@ -18,7 +18,7 @@ class FedRatesScaper:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         })
     
-    def get_fed_funds_rate_yahoo(self):
+    def get_fed_funds_rate_yahoo(self, range_value: str = '1h', interval: str = '5m'):
         """
         Get Fed Funds rate from Yahoo Finance
         Symbol: ^IRX (13-week Treasury Bill)
@@ -27,8 +27,8 @@ class FedRatesScaper:
             # Yahoo Finance API endpoint for Treasury data
             url = "https://query1.finance.yahoo.com/v8/finance/chart/^IRX"
             params = {
-                'interval': '5m', # previous: '1d'
-                'range': '1h'     # previous: '5d'
+                'interval': interval, # e.g. '5m'
+                'range': range_value   # e.g. '1h'
             }
             
             response = self.session.get(url, params=params, timeout=10)
@@ -58,30 +58,36 @@ class FedRatesScaper:
         Try multiple sources and return all successful fetches
         """
         # print("Fetching Fed rates from multiple sources...")
-        
         sources = [
             ('Yahoo Finance', self.get_fed_funds_rate_yahoo)
         ]
-        
+
         successful_rates = []
-        
+
         for source_name, fetch_func in sources:
             try:
                 print(f"Trying {source_name}...")
+                # fetch_func may return a single dict or a list of dicts (historical series)
                 rate_data = fetch_func()
-                
-                if rate_data:
-                    print(f"{source_name}: {rate_data['rate']:.3f}% ({rate_data['description']})")
-                    successful_rates.append(rate_data)
-                else:
+
+                if not rate_data:
                     print(f"❌ {source_name}: No data")
-                    
+                    continue
+
+                if isinstance(rate_data, list):
+                    for rd in rate_data:
+                        print(f"{source_name}: {rd.get('rate', 0):.3f}% ({rd.get('description', '')}) at {rd.get('timestamp')}")
+                        successful_rates.append(rd)
+                else:
+                    print(f"{source_name}: {rate_data.get('rate', 0):.3f}% ({rate_data.get('description', '')})")
+                    successful_rates.append(rate_data)
+
             except Exception as e:
                 print(f"❌ {source_name}: Error - {e}")
-        
+
         return successful_rates
 
-async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.csv"):
+async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.csv", range_value: str = None, interval: str = None):
     """
     Async function to fetch Fed rates using scraping and write to CSV
     """
@@ -90,8 +96,25 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
     
     print("Fetching Fed rates from public sources (no API key needed)...")
     
-    # Get rates from all available sources
-    rates_data = scraper.get_all_available_rates()
+    # Get rates from all available sources. Pass range/interval if provided
+    if range_value is None:
+        range_value = config.FED_RATES_RANGE
+    if interval is None:
+        interval = config.FED_RATES_INTERVAL
+
+    # Attempt to use the yahoo fetcher with provided params
+    # Our get_all_available_rates will call get_fed_funds_rate_yahoo() without params, so call explicitly
+    rates_data = []
+    try:
+        y = scraper.get_fed_funds_rate_yahoo(range_value=range_value, interval=interval)
+        if isinstance(y, list):
+            rates_data.extend(y)
+        elif y:
+            rates_data.append(y)
+    except Exception as e:
+        print(f"Error fetching from Yahoo with params range={range_value} interval={interval}: {e}")
+        # Fallback to the generic collector which may still return a single value
+        rates_data.extend(scraper.get_all_available_rates())
     
     if not rates_data:
         print("❌ No Fed rate data retrieved from any source")

@@ -39,6 +39,10 @@ class Config:
     # API Rate Limiting
     FRED_RATE_LIMIT = int(os.getenv('FRED_RATE_LIMIT', '120'))
     YAHOO_FINANCE_RATE_LIMIT = int(os.getenv('YAHOO_FINANCE_RATE_LIMIT', '2000'))
+
+    # Fed rates fetch parameters (range and interval for Yahoo requests)
+    FED_RATES_RANGE = os.getenv('FED_RATES_RANGE', '1h')
+    FED_RATES_INTERVAL = os.getenv('FED_RATES_INTERVAL', '5m')
     
     # Retry Configuration
     MAX_RETRIES = int(os.getenv('MAX_RETRIES', '3'))
