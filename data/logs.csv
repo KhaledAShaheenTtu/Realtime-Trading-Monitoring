@@ -581,3 +581,14 @@ Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for 
 Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... 
 ================================================== 
 2025-10-06 03:15:55 Wait time till the next start: 286.8
+2025-10-06 03:20:42 Candle of 'BINANCE:BTCUSDT' has written to the file data/btcusdt.csv with the time 2025-10-06 03:20:00+00:00
+2025-10-06 03:20:42 Candle of 'BINANCE:TONUSDT' has written to the file data/tonusdt.csv with the time 2025-10-06 03:20:00+00:00
+2025-10-06 03:20:43 Candle of 'LSE:MAG7' has written to the file data/mag7.csv with the time 2025-10-03 15:25:00+00:00
+2025-10-06 03:20:43 Fed rates scraped and written from yahoo: data/fed_rates.csv
+2025-10-06 03:20:44 News for instruments retrieved
+2025-10-06 03:20:56 EDGAR filings written to:  data/sec_filings_combined.csv
+2025-10-06 03:20:56 Trying to check the last data for signal
+2025-10-06 03:20:56 ================================================== 
+Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... 
+================================================== 
+2025-10-06 03:20:56 Wait time till the next start: 285.7
