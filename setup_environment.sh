@@ -1,7 +1,4 @@
-#!/bin/bash
-
 # Realtime Trading Monitoring Environment Setup Script
-# This script sets up the conda environment from scratch
 
 echo "Setting up Realtime Trading Monitoring Environment"
 echo "====================================================="
