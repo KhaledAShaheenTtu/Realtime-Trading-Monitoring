@@ -4,12 +4,7 @@ import os
 from trading_data_classes import DataWorks
 from config import config
 
-class FedRatesScaper:
-    """
-    Alternative Fed rates data collector using public data sources
-    No API key required
-    """
-    
+class FedRatesScaper:    
     def __init__(self):
         self.dw = DataWorks()
         self.session = requests.Session()
