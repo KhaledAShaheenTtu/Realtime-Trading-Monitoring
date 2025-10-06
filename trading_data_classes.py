@@ -8,7 +8,6 @@ import os
 import socket
 import ssl
 import base64
-import hashlib
 import struct
 import urllib.parse
 import requests                             

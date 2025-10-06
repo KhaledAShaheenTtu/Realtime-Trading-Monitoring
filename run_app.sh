@@ -3,7 +3,7 @@
 # Realtime Trading Monitoring Application Launcher
 # This script activates the conda environment and runs the main application
 
-echo "🚀 Starting Realtime Trading Monitoring Application"
+echo "Starting Realtime Trading Monitoring Application"
 echo "=================================================="
 
 # Check if conda is available
