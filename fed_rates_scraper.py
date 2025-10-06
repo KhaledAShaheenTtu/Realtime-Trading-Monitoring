@@ -1,7 +1,6 @@
 import requests
 import datetime
 import os
-import asyncio
 from trading_data_classes import DataWorks
 from config import config
 
@@ -52,40 +51,6 @@ class FedRatesScaper:
         except Exception as e:
             print(f"❌ Error fetching from Yahoo Finance: {e}")
             return None
-    
-    def get_all_available_rates(self):
-        """
-        Try multiple sources and return all successful fetches
-        """
-        # print("Fetching Fed rates from multiple sources...")
-        sources = [
-            ('Yahoo Finance', self.get_fed_funds_rate_yahoo)
-        ]
-
-        successful_rates = []
-
-        for source_name, fetch_func in sources:
-            try:
-                print(f"Trying {source_name}...")
-                # fetch_func may return a single dict or a list of dicts (historical series)
-                rate_data = fetch_func()
-
-                if not rate_data:
-                    print(f"❌ {source_name}: No data")
-                    continue
-
-                if isinstance(rate_data, list):
-                    for rd in rate_data:
-                        print(f"{source_name}: {rd.get('rate', 0):.3f}% ({rd.get('description', '')}) at {rd.get('timestamp')}")
-                        successful_rates.append(rd)
-                else:
-                    print(f"{source_name}: {rate_data.get('rate', 0):.3f}% ({rate_data.get('description', '')})")
-                    successful_rates.append(rate_data)
-
-            except Exception as e:
-                print(f"❌ {source_name}: Error - {e}")
-
-        return successful_rates
 
 async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.csv", range_value: str = None, interval: str = None):
     """
@@ -94,8 +59,6 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
     scraper = FedRatesScaper()
     dw = DataWorks()
     
-    print("Fetching Fed rates from public sources (no API key needed)...")
-    
     # Get rates from all available sources. Pass range/interval if provided
     if range_value is None:
         range_value = config.FED_RATES_RANGE
@@ -103,7 +66,6 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
         interval = config.FED_RATES_INTERVAL
 
     # Attempt to use the yahoo fetcher with provided params
-    # Our get_all_available_rates will call get_fed_funds_rate_yahoo() without params, so call explicitly
     rates_data = []
     try:
         y = scraper.get_fed_funds_rate_yahoo(range_value=range_value, interval=interval)
@@ -113,12 +75,6 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
             rates_data.append(y)
     except Exception as e:
         print(f"Error fetching from Yahoo with params range={range_value} interval={interval}: {e}")
-        # Fallback to the generic collector which may still return a single value
-        rates_data.extend(scraper.get_all_available_rates())
-    
-    if not rates_data:
-        print("❌ No Fed rate data retrieved from any source")
-        return
     
     # Write to CSV file
     try:
@@ -138,54 +94,9 @@ async def fetch_and_write_fed_rates_scraper(file_path="data/fed_rates_scraper.cs
                 f.write(f"{rate_data['description']},")
                 f.write(f"{timestamp}\n")
         
-        dw.write_log_line(f"Fed rates scraped and written: {len(rates_data)} sources to the file: {file_path}")
-        print(f"Successfully wrote {len(rates_data)} Fed rate sources to {file_path}")
+        dw.write_log_line(f"Fed rates scraped and written from yahoo: {file_path}")
+        print(f"Successfully wrote to {file_path}")
         
     except Exception as e:
         print(f"❌ Error writing Fed rates to file: {e}")
         dw.write_log_line(f"Error writing Fed rates: {e}")
-
-def test_fed_rates_scraper():
-    """
-    Test the Fed rates scraper
-    """
-    print("TESTING FED RATES SCRAPER")
-    print("=" * 50)
-    print("This method uses public data sources - no API key needed!")
-    print()
-    
-    scraper = FedRatesScaper()
-    
-    # Test all sources
-    rates = scraper.get_all_available_rates()
-    
-    print(f"\n📊 RESULTS SUMMARY:")
-    print("=" * 50)
-    
-    if rates:
-        print(f"✅ Successfully fetched Fed rate data from {len(rates)} sources:")
-        
-        for rate_data in rates:
-            print(f"   • {rate_data['source']}: {rate_data['rate']:.3f}%")
-            print(f"     {rate_data['description']}")
-        
-        print(f"\n🔄 TESTING ASYNC INTEGRATION:")
-        asyncio.run(fetch_and_write_fed_rates_scraper("data/test_fed_rates_scraper.csv"))
-        
-    else:
-        print("❌ No Fed rate data sources working")
-        print("This could be due to:")
-        print("• Website structure changes")
-        print("• Network connectivity issues") 
-        print("• Rate limiting from sources")
-    
-    print(f"\n✅ Fed rates scraper test completed!")
-
-if __name__ == "__main__":
-    print("FED RATES SCRAPER ENDPOINT")
-    print("=" * 50)
-    print("Alternative Fed rates data collection using public sources")
-    print("No API key registration required!")
-    print()
-    
-    test_fed_rates_scraper()
