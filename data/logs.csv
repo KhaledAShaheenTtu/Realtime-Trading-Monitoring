@@ -481,3 +481,26 @@ Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for 
 Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... 
 ================================================== 
 2025-10-05 00:00:26 Wait time till the next start: 288.4
+2025-10-06 02:35:00 Waiting 14.5 seconds till the next 5 minutes interval before requesting price from the TradingView
+2025-10-06 02:35:15 Candle of 'BINANCE:BTCUSDT' has written to the file data/btcusdt.csv with the time 2025-10-06 02:35:00+00:00
+2025-10-06 02:35:16 Candle of 'BINANCE:TONUSDT' has written to the file data/tonusdt.csv with the time 2025-10-06 02:35:00+00:00
+2025-10-06 02:35:16 Candle of 'LSE:MAG7' has written to the file data/mag7.csv with the time 2025-10-03 15:25:00+00:00
+2025-10-06 02:35:17 Fed rates scraped and written from yahoo: data/fed_rates.csv
+2025-10-06 02:35:18 News for instruments retrieved
+2025-10-06 02:35:34 EDGAR filings written to:  data/sec_filings_combined.csv
+2025-10-06 02:35:34 Trying to check the last data for signal
+2025-10-06 02:35:34 ================================================== 
+Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... 
+================================================== 
+2025-10-06 02:35:34 Wait time till the next start: 280.8
+2025-10-06 02:40:15 Candle of 'BINANCE:BTCUSDT' has written to the file data/btcusdt.csv with the time 2025-10-06 02:40:00+00:00
+2025-10-06 02:40:16 Candle of 'BINANCE:TONUSDT' has written to the file data/tonusdt.csv with the time 2025-10-06 02:40:00+00:00
+2025-10-06 02:40:17 Candle of 'LSE:MAG7' has written to the file data/mag7.csv with the time 2025-10-03 15:25:00+00:00
+2025-10-06 02:40:17 Fed rates scraped and written from yahoo: data/fed_rates.csv
+2025-10-06 02:40:18 News for instruments retrieved
+2025-10-06 02:40:33 EDGAR filings written to:  data/sec_filings_combined.csv
+2025-10-06 02:40:33 Trying to check the last data for signal
+2025-10-06 02:40:33 ================================================== 
+Gathering prices, Fed rates, news and filings has finished, Now I'm waiting for the next 5 minutes... 
+================================================== 
+2025-10-06 02:40:33 Wait time till the next start: 281.7
