@@ -36,11 +36,11 @@ fi
 echo "✅ Environment activated successfully"
 
 # Display current configuration
-echo "📋 Checking configuration..."
+echo " Checking configuration..."
 python config.py
 
 echo ""
-echo "🏃 Starting the trading monitor application..."
+echo " Starting the trading monitor application..."
 echo "Press Ctrl+C to stop the application"
 echo ""
 
