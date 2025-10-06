@@ -1,6 +1,6 @@
 # Environment Configuration Guide
 
-## 🚀 Anaconda Environment Setup (Recommended)
+## Anaconda Environment Setup (Recommended)
 
 This project has been refactored to use Anaconda for optimal dependency management and environment isolation.
 
@@ -15,17 +15,17 @@ conda activate trading-monitor
 ```
 
 ### Benefits of Using Anaconda
-- ✅ **Isolated Environment**: No conflicts with system Python
-- ✅ **Optimized Packages**: Pre-compiled binaries from conda-forge
-- ✅ **Reproducible**: Same environment across different machines
-- ✅ **Jupyter Integration**: Built-in support for data analysis
-- ✅ **Easy Management**: Simple activate/deactivate workflow
+- **Isolated Environment**: No conflicts with system Python
+- **Optimized Packages**: Pre-compiled binaries from conda-forge
+- **Reproducible**: Same environment across different machines
+- **Jupyter Integration**: Built-in support for data analysis
+- **Easy Management**: Simple activate/deactivate workflow
 
-## ✅ .env File Successfully Added!
+##  .env File Successfully Added!
 
 This project now uses environment variables for configuration management, making it more secure and flexible.
 
-## 🔧 Setup Instructions
+## Setup Instructions
 
 ### 1. Environment Variables File
 The project includes:
@@ -47,7 +47,7 @@ conda activate trading-monitor
 python write_current_price.py
 ```
 
-## 📊 Current Configuration
+## Current Configuration
 
 ### Data Collection Settings
 ```env
@@ -76,7 +76,7 @@ MAX_RETRIES=3                 # Retry attempts on failure
 RETRY_DELAY=5                 # Seconds between retries
 ```
 
-## 🚀 Usage
+## Usage
 
 ```bash
 # Quick start - runs everything automatically
@@ -97,14 +97,14 @@ python write_current_price.py  # Run main application
 5. Handle API keys securely
 6. Collect data every 5 minutes automatically
 
-## 🔒 Security Features
+##  Security Features
 
-✅ **API Keys Protected**: Stored in .env file (excluded from git)  
-✅ **Default Fallbacks**: Works without API keys using free sources  
-✅ **Environment Separation**: Different configs for dev/prod  
-✅ **Validation**: Checks configuration on startup  
+ **API Keys Protected**: Stored in .env file (excluded from git)  
+ **Default Fallbacks**: Works without API keys using free sources  
+ **Environment Separation**: Different configs for dev/prod  
+ **Validation**: Checks configuration on startup  
 
-## 📁 File Structure
+##  File Structure
 ```
 ├── .env                    # Your actual configuration
 ├── .env.example           # Configuration template
@@ -117,7 +117,7 @@ python write_current_price.py  # Run main application
 └── data/                  # Data output directory
 ```
 
-## 🔧 Customization
+##  Customization
 
 ### Change Data Collection Interval
 Edit `.env` file:
@@ -139,14 +139,14 @@ ENVIRONMENT=production
 LOG_LEVEL=ERROR
 ```
 
-## ⚠️ Important Notes
+##  Important Notes
 
 1. **Never commit .env file** - It's already in .gitignore
 2. **API keys are optional** - The system works with fallback sources
 3. **Configuration is validated** - Missing critical settings are reported
 4. **Paths are auto-created** - Data directories are created automatically
 
-## 🛠️ Troubleshooting
+##  Troubleshooting
 
 ### Anaconda Issues
 
